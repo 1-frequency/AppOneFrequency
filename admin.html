@@ -9,6 +9,14 @@
 </head>
 <body class="bg-slate-950 text-white min-h-screen pb-20">
 
+    <!-- TOAST NOTIFICATION KUSTOM -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-5">
+        <div id="toast-content" class="bg-slate-900 border border-slate-700 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold">
+            <span id="toast-icon">✅</span>
+            <span id="toast-msg">Pesan notifikasi</span>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 flex justify-between items-center">
         <h1 class="text-lg font-bold text-orange-500">M-BANKING ADMIN</h1>
@@ -76,9 +84,9 @@
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-4 text-orange-400">Buat Rencana Touring</h3>
                 <form id="form-touring" class="space-y-3">
-                    <input type="text" id="t-nama" placeholder="Nama Acara (Cth: Wajib Pangandaran)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="text" id="t-tujuan" placeholder="Destinasi / Tujuan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="number" id="t-budget" placeholder="Target Budget Kas (Rp)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
+                    <input type="text" id="t-nama" autocomplete="off" placeholder="Nama Acara (Cth: Wajib Pangandaran)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
+                    <input type="text" id="t-tujuan" autocomplete="off" placeholder="Destinasi / Tujuan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
+                    <input type="number" id="t-budget" autocomplete="off" placeholder="Target Budget Kas (Rp)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
                     <input type="date" id="t-tanggal" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-300" required>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Plan Touring</button>
                 </form>
@@ -100,7 +108,7 @@
                 <input type="hidden" id="trans-type">
                 <div>
                     <label class="text-xs text-slate-400">Jumlah (Rp)</label>
-                    <input type="number" id="trans-amount" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    <input type="number" id="trans-amount" autocomplete="off" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
 
                 <!-- Field khusus Uang Masuk -->
@@ -130,11 +138,11 @@
                 <div id="fields-keluar" class="space-y-3 hidden">
                     <div>
                         <label class="text-xs text-slate-400">Kategori</label>
-                        <input type="text" id="trans-cat-input" placeholder="Cth: Konsumsi / Perbaikan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                        <input type="text" id="trans-cat-input" autocomplete="off" placeholder="Cth: Konsumsi / Perbaikan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
                     </div>
                     <div>
                         <label class="text-xs text-slate-400">Keterangan Tambahan</label>
-                        <input type="text" id="trans-desc-input" placeholder="Cth: Beli sparepart" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                        <input type="text" id="trans-desc-input" autocomplete="off" placeholder="Cth: Beli sparepart" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
                     </div>
                 </div>
 
@@ -154,15 +162,15 @@
                 <input type="hidden" id="m-edit-id">
                 <div>
                     <label class="text-xs text-slate-400">Nama Lengkap</label>
-                    <input type="text" id="m-nama" placeholder="Masukkan nama lengkap" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    <input type="text" id="m-nama" autocomplete="off" placeholder="Masukkan nama lengkap" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
                 <div>
                     <label class="text-xs text-slate-400">NRA (Nomor Anggota)</label>
-                    <input type="text" id="m-nra" placeholder="Cth: 0203" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    <input type="text" id="m-nra" autocomplete="off" placeholder="Cth: 0203" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
                 <div>
                     <label class="text-xs text-slate-400">Plat Nomor Kendaraan</label>
-                    <input type="text" id="m-plat" placeholder="Cth: B 1234 ABC" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                    <input type="text" id="m-plat" autocomplete="off" placeholder="Cth: B 1234 ABC" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" id="btn-batal-member" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
@@ -176,6 +184,31 @@
     <script>
     (function() {
         const db = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
+
+        // Fungsi Toast Notification Kustom
+        function showNotification(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastContent = document.getElementById('toast-content');
+
+            toastMsg.innerText = message;
+            if(type === 'success') {
+                toastIcon.innerText = '✅';
+                toastContent.className = 'bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold backdrop-blur-md';
+            } else {
+                toastIcon.innerText = '❌';
+                toastContent.className = 'bg-rose-950/90 border border-rose-500/50 text-rose-200 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold backdrop-blur-md';
+            }
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-5');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-5');
+            }, 3000);
+        }
 
         async function loadKeuangan() {
             const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false });
@@ -326,7 +359,6 @@
             document.getElementById('modal-member').classList.add('hidden');
         }
 
-        // Global functions untuk interaksi tombol Edit & Hapus member
         window.editMember = function(id, nama, nra, plat) {
             document.getElementById('modal-member-title').innerText = 'Edit Anggota';
             document.getElementById('m-edit-id').value = id;
@@ -339,9 +371,10 @@
         window.deleteMember = async function(id) {
             if(confirm('Apakah Anda yakin ingin menghapus member ini?')) {
                 const { error } = await db.from('members').delete().eq('id', id);
-                if(error) alert(error.message);
-                else {
-                    alert('Member berhasil dihapus!');
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else {
+                    showNotification('Member berhasil dihapus!', 'success');
                     loadMembers();
                 }
             }
@@ -350,7 +383,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadKeuangan();
 
-            // Tab Switcher Logic
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = e.target.id.replace('btn-', '');
@@ -369,16 +401,13 @@
                 });
             });
 
-            // Member Modal Listeners
             document.getElementById('btn-open-member-modal').addEventListener('click', openMemberModal);
             document.getElementById('btn-batal-member').addEventListener('click', closeMemberModal);
 
-            // Modal Listeners Transaksi
             document.getElementById('btn-modal-masuk').addEventListener('click', () => openModal('masuk'));
             document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
             document.getElementById('btn-batal').addEventListener('click', closeModal);
 
-            // Form Submit Member (Bisa untuk Insert atau Update)
             document.getElementById('form-member').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('m-edit-id').value;
@@ -403,9 +432,10 @@
                     error = res.error;
                 }
 
-                if(error) alert(error.message);
-                else { 
-                    alert(editId ? 'Member berhasil diperbarui!' : 'Member berhasil disimpan!'); 
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else { 
+                    showNotification(editId ? 'Member berhasil diperbarui!' : 'Member berhasil disimpan!', 'success'); 
                     document.getElementById('form-member').reset(); 
                     document.getElementById('m-edit-id').value = '';
                     closeMemberModal(); 
@@ -421,8 +451,13 @@
                     target_budget: document.getElementById('t-budget').value,
                     tanggal_berangkat: document.getElementById('t-tanggal').value
                 }]);
-                if(error) alert(error.message);
-                else { alert('Plan Touring berhasil disimpan!'); document.getElementById('form-touring').reset(); loadTouring(); }
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else { 
+                    showNotification('Plan Touring berhasil disimpan!', 'success'); 
+                    document.getElementById('form-touring').reset(); 
+                    loadTouring(); 
+                }
             });
 
             document.getElementById('form-transaksi').addEventListener('submit', async (e) => {
@@ -449,10 +484,12 @@
                     description: description
                 }]);
 
-                if(error) alert(error.message);
-                else { 
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else { 
                     closeModal(); 
                     document.getElementById('form-transaksi').reset(); 
+                    showNotification('Transaksi berhasil disimpan!', 'success');
                     loadKeuangan(); 
                 }
             });
