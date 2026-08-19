@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Kas Komunitas Motor</title>
+    <!-- Tailwind CSS untuk styling cepat ala Mobile App -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 pb-10">
+
+    <!-- Header -->
+    <header class="p-5 bg-gray-800 shadow-md">
+        <h1 class="text-xl font-bold text-orange-500">M-KAS <span class="text-white">RIDER</span></h1>
+        <p class="text-xs text-gray-400">Dashboard Keuangan & Touring</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        
+        <!-- SECTION 1: DASHBOARD TOURING -->
+        <section class="glass-card rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                NEXT TOURING
+            </div>
+            <h2 class="text-2xl font-bold mb-1" id="touring-name">Memuat...</h2>
+            <p class="text-gray-400 text-sm mb-4">Tujuan: <span id="touring-dest" class="text-white font-semibold">-</span></p>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                    <p class="text-xs text-gray-400">Berangkat</p>
+                    <p class="font-bold text-sm" id="touring-date">-</p>
+                </div>
+                <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                    <p class="text-xs text-gray-400">Countdown</p>
+                    <p class="font-bold text-orange-400 text-sm" id="touring-countdown">- Hari Lagi</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-gray-400">Target Budget Kas</span>
+                    <span class="font-bold text-green-400" id="touring-budget">Rp 0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: REKAP KAS 4 SESI -->
+        <section>
+            <h3 class="text-lg font-bold mb-3 flex items-center">
+                <span class="bg-orange-500 w-2 h-6 mr-2 rounded"></span> Rekap Kas Member (4 Sesi)
+            </h3>
+            <div class="overflow-x-auto glass-card rounded-xl border border-gray-700">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-800 text-gray-400">
+                        <tr>
+                            <th class="p-3">Member</th>
+                            <th class="p-3 text-center">Sesi 1</th>
+                            <th class="p-3 text-center">Sesi 2</th>
+                            <th class="p-3 text-center">Sesi 3</th>
+                            <th class="p-3 text-center">Sesi 4</th>
+                            <th class="p-3 text-right">Total Kas</th>
+                            <th class="p-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kas-table-body" class="divide-y divide-gray-700">
+                        <tr>
+                            <td colspan="7" class="p-5 text-center text-gray-500">Memuat data kas...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SCRIPT LOGIKA KONEKSI SUPABASE -->
+    <script>
+        // KREDENSIAL SUPABASE
+        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+
+        // Inisialisasi Klien Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Fungsi Format Rupiah
+        const formatRupiah = (angka) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
+        };
+
+        // FUNGSI AMBIL DATA TOURING
+        async function fetchTouringData() {
+            try {
+                const { data, error } = await supabase
+                    .from('touring_plans')
+                    .select('*')
+                    .eq('status_acara', 'rencana')
+                    .order('tanggal_berangkat', { ascending: true })
+                    .limit(1)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') throw error; // Abaikan error jika data kosong
+
+                if (data) {
+                    document.getElementById('touring-name').innerText = data.nama_acara;
+                    document.getElementById('touring-dest').innerText = data.tujuan;
+                    document.getElementById('touring-budget').innerText = formatRupiah(data.target_budget);
+                    
+                    const tglBerangkat = new Date(data.tanggal_berangkat);
+                    document.getElementById('touring-date').innerText = tglBerangkat.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                    
+                    const hariIni = new Date();
+                    const selisihWaktu = tglBerangkat - hariIni;
+                    const selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
+                    
+                    document.getElementById('touring-countdown').innerText = selisihHari > 0 ? `${selisihHari} Hari Lagi` : 'Berangkat!';
+                } else {
+                    document.getElementById('touring-name').innerText = "Belum Ada Jadwal Touring";
+                }
+            } catch (err) {
+                console.log('Error ambil touring:', err.message);
+                document.getElementById('touring-name').innerText = "Belum Ada Jadwal Touring";
+            }
+        }
+
+        // FUNGSI AMBIL DATA REKAP KAS MEMBER
+        async function fetchKasData() {
+            try {
+                const { data, error } = await supabase
+                    .from('view_rekap_kas_member')
+                    .select('*')
+                    .order('nama_lengkap', { ascending: true });
+
+                if (error) throw error;
+
+                const tableBody = document.getElementById('kas-table-body');
+                tableBody.innerHTML = ''; 
+
+                if(data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">Belum ada data member. Tambahkan data via Supabase.</td></tr>';
+                    return;
+                }
+
+                data.forEach(row => {
+                    const s1 = row.lunas_sesi_1 > 0 ? '✅' : '❌';
+                    const s2 = row.lunas_sesi_2 > 0 ? '✅' : '❌';
+                    const s3 = row.lunas_sesi_3 > 0 ? '✅' : '❌';
+                    const s4 = row.lunas_sesi_4 > 0 ? '✅' : '❌';
+                    
+                    const statusBadge = row.status_final === 'LUNAS 100%' 
+                        ? `<span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/30">LUNAS</span>` 
+                        : `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">BELUM</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-3">
+                            <div class="font-semibold text-gray-200">${row.nama_lengkap}</div>
+                            <div class="text-xs text-gray-500">NRA: ${row.nra || '-'}</div>
+                        </td>
+                        <td class="p-3 text-center">${s1}</td>
+                        <td class="p-3 text-center">${s2}</td>
+                        <td class="p-3 text-center">${s3}</td>
+                        <td class="p-3 text-center">${s4}</td>
+                        <td class="p-3 text-right font-mono text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
+                        <td class="p-3 text-center">${statusBadge}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Error mengambil rekap kas: ", err.message);
+                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-3 text-center text-red-400">Gagal memuat data: pastikan RLS Supabase sudah disetting (Public Read).</td></tr>`;
+            }
+        }
+
+        // Jalankan saat halaman siap
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchTouringData();
+            fetchKasData();
+        });
+    </script>
+</body>
+</html>
