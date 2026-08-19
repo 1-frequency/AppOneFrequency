@@ -106,6 +106,7 @@
             <h3 id="modal-title" class="font-bold text-base text-orange-400">Input Transaksi</h3>
             <form id="form-transaksi" class="space-y-3">
                 <input type="hidden" id="trans-type">
+                <input type="hidden" id="trans-edit-id">
                 <div>
                     <label class="text-xs text-slate-400">Jumlah (Rp)</label>
                     <input type="number" id="trans-amount" autocomplete="off" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
@@ -232,27 +233,42 @@
 
             data.forEach(t => {
                 const amt = parseFloat(t.amount);
+                const descText = t.description || '-';
+                const catText = t.category || '-';
+
                 if(t.type === 'masuk') {
                     hasMasuk = true;
                     total += amt;
                     listMasuk.innerHTML += `
-                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 space-y-1">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-xs text-slate-200">${t.category}</span>
-                                <span class="font-bold text-xs text-emerald-400">+ Rp ${amt.toLocaleString()}</span>
+                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 flex justify-between items-center text-xs space-x-2">
+                            <div class="space-y-1 overflow-hidden">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-200">${catText}</span>
+                                    <span class="font-bold text-emerald-400">+ Rp ${amt.toLocaleString()}</span>
+                                </div>
+                                <p class="text-[10px] text-slate-400 truncate">${descText}</p>
                             </div>
-                            <p class="text-[10px] text-slate-400">${t.description || '-'}</p>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick="window.editTransaction('${t.id}', '${t.type}', '${t.amount}', '${catText.replace(/'/g, "\\'")}', '${descText.replace(/'/g, "\\'")}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
+                                <button onclick="window.deleteTransaction('${t.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                            </div>
                         </div>`;
                 } else {
                     hasKeluar = true;
                     total -= amt;
                     listKeluar.innerHTML += `
-                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 space-y-1">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-xs text-slate-200">${t.category}</span>
-                                <span class="font-bold text-xs text-rose-400">- Rp ${amt.toLocaleString()}</span>
+                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 flex justify-between items-center text-xs space-x-2">
+                            <div class="space-y-1 overflow-hidden">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-200">${catText}</span>
+                                    <span class="font-bold text-rose-400">- Rp ${amt.toLocaleString()}</span>
+                                </div>
+                                <p class="text-[10px] text-slate-400 truncate">${descText}</p>
                             </div>
-                            <p class="text-[10px] text-slate-400">${t.description || '-'}</p>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick="window.editTransaction('${t.id}', '${t.type}', '${t.amount}', '${catText.replace(/'/g, "\\'")}', '${descText.replace(/'/g, "\\'")}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
+                                <button onclick="window.deleteTransaction('${t.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                            </div>
                         </div>`;
                 }
             });
@@ -314,6 +330,7 @@
         async function openModal(type) {
             document.getElementById('modal').classList.remove('hidden');
             document.getElementById('trans-type').value = type;
+            document.getElementById('trans-edit-id').value = '';
             const title = document.getElementById('modal-title');
             
             const fieldsMasuk = document.getElementById('fields-masuk');
@@ -376,6 +393,53 @@
                 } else {
                     showNotification('Member berhasil dihapus!', 'success');
                     loadMembers();
+                }
+            }
+        };
+
+        window.editTransaction = async function(id, type, amount, category, description) {
+            await openModal(type);
+            document.getElementById('trans-edit-id').value = id;
+            document.getElementById('trans-amount').value = amount;
+            
+            const title = document.getElementById('modal-title');
+            if (type === 'masuk') {
+                title.innerText = 'Edit Uang Masuk';
+                title.className = 'font-bold text-base text-emerald-400';
+                document.getElementById('trans-cat-select').value = category;
+
+                if (description.includes('Bulan:')) {
+                    const parts = description.split(' | ');
+                    if (parts.length >= 2) {
+                        const monthPart = parts[0].replace('Bulan:', '').trim();
+                        document.getElementById('trans-month').value = monthPart;
+
+                        const memberPart = parts.slice(1).join(' | ').trim();
+                        const descSelect = document.getElementById('trans-desc-select');
+                        for (let option of descSelect.options) {
+                            if (option.value === memberPart) {
+                                descSelect.value = memberPart;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                title.innerText = 'Edit Uang Keluar';
+                title.className = 'font-bold text-base text-rose-400';
+                document.getElementById('trans-cat-input').value = category;
+                document.getElementById('trans-desc-input').value = description;
+            }
+        };
+
+        window.deleteTransaction = async function(id) {
+            if(confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                const { error } = await db.from('transactions').delete().eq('id', id);
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else {
+                    showNotification('Transaksi berhasil dihapus!', 'success');
+                    loadKeuangan();
                 }
             }
         };
@@ -462,6 +526,7 @@
 
             document.getElementById('form-transaksi').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const editId = document.getElementById('trans-edit-id').value;
                 const type = document.getElementById('trans-type').value;
                 let category, description;
 
@@ -477,19 +542,32 @@
                     description = document.getElementById('trans-desc-input').value;
                 }
 
-                const { error } = await db.from('transactions').insert([{
-                    type: type,
-                    amount: document.getElementById('trans-amount').value,
-                    category: category,
-                    description: description
-                }]);
+                let error;
+                if (editId) {
+                    const res = await db.from('transactions').update({
+                        type: type,
+                        amount: document.getElementById('trans-amount').value,
+                        category: category,
+                        description: description
+                    }).eq('id', editId);
+                    error = res.error;
+                } else {
+                    const res = await db.from('transactions').insert([{
+                        type: type,
+                        amount: document.getElementById('trans-amount').value,
+                        category: category,
+                        description: description
+                    }]);
+                    error = res.error;
+                }
 
                 if(error) {
                     showNotification(error.message, 'error');
                 } else { 
                     closeModal(); 
                     document.getElementById('form-transaksi').reset(); 
-                    showNotification('Transaksi berhasil disimpan!', 'success');
+                    document.getElementById('trans-edit-id').value = '';
+                    showNotification(editId ? 'Transaksi berhasil diperbarui!' : 'Transaksi berhasil disimpan!', 'success');
                     loadKeuangan(); 
                 }
             });
