@@ -3,88 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M-Kas Komunitas Motor</title>
-    <!-- Tailwind CSS untuk styling cepat ala Mobile App -->
+    <title>M-KAS RIDER - Dashboard Keuangan & Touring</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.7), rgba(17, 24, 39, 0.8));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .touring-glow {
+            box-shadow: 0 0 25px -5px rgba(249, 115, 22, 0.2);
+            border: 1px solid rgba(249, 115, 22, 0.3);
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 pb-10">
+<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 selection:bg-orange-500 selection:text-white">
 
-    <!-- Header -->
-    <header class="p-5 bg-gray-800 shadow-md">
-        <h1 class="text-xl font-bold text-orange-500">M-KAS <span class="text-white">RIDER</span></h1>
-        <p class="text-xs text-gray-400">Dashboard Keuangan & Touring</p>
+    <!-- Header Premium -->
+    <header class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-6 py-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
+                    M-KAS <span class="text-white">RIDER</span>
+                </h1>
+                <p class="text-xs text-gray-400 font-medium">Dashboard Keuangan & Manajemen Touring</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    <span class="w-1.5 h-1.5 mr-1.5 bg-orange-500 rounded-full animate-pulse"></span> Live Sync
+                </span>
+            </div>
+        </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-6">
+    <main class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
         
-        <!-- SECTION 1: DASHBOARD TOURING -->
-        <section class="glass-card rounded-2xl p-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                NEXT TOURING
-            </div>
-            <h2 class="text-2xl font-bold mb-1" id="touring-name">Memuat...</h2>
-            <p class="text-gray-400 text-sm mb-4">Tujuan: <span id="touring-dest" class="text-white font-semibold">-</span></p>
-            
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
-                    <p class="text-xs text-gray-400">Berangkat</p>
-                    <p class="font-bold text-sm" id="touring-date">-</p>
+        <!-- SECTION 1: NEXT TOURING (Desain Mewah & Glowing) -->
+        <section class="touring-glow rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950">
+            <!-- Background Accent Shape -->
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
+                        Next Touring Agenda
+                    </span>
+                    <h2 class="text-3xl font-black mt-3 text-white tracking-tight" id="touring-name">Memuat Jadwal...</h2>
+                    <p class="text-gray-400 text-sm mt-1 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Tujuan: <span id="touring-dest" class="text-white font-semibold ml-1">-</span>
+                    </p>
                 </div>
-                <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
-                    <p class="text-xs text-gray-400">Countdown</p>
-                    <p class="font-bold text-orange-400 text-sm" id="touring-countdown">- Hari Lagi</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
+                <div class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 backdrop-blur-sm flex items-center space-x-3">
+                    <div class="p-3 bg-orange-500/10 rounded-xl text-orange-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Jadwal Berangkat</p>
+                        <p class="font-bold text-base text-white" id="touring-date">-</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800/60 p-4 rounded-2xl border border-gray-700/50 backdrop-blur-sm flex items-center space-x-3">
+                    <div class="p-3 bg-amber-500/10 rounded-xl text-amber-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Countdown Waktu</p>
+                        <p class="font-extrabold text-base text-amber-400" id="touring-countdown">- Hari Lagi</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <div class="flex justify-between text-xs mb-1">
-                    <span class="text-gray-400">Target Budget Kas</span>
-                    <span class="font-bold text-green-400" id="touring-budget">Rp 0</span>
-                </div>
+            <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
+                <span class="text-xs text-gray-400 font-medium">Target Budget Kas Terkumpul</span>
+                <span class="font-black text-lg text-emerald-400" id="touring-budget">Rp 0</span>
             </div>
         </section>
 
-        <!-- SECTION 2: REKAP KAS & FILTER STATUS -->
-        <section class="space-y-3">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <h3 class="text-lg font-bold flex items-center">
-                    <span class="bg-orange-500 w-2 h-6 mr-2 rounded"></span> Rekap Kas Member (4 Sesi)
-                </h3>
+        <!-- SECTION 2: REKAP KAS MEMBER -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-2.5 h-7 bg-orange-500 rounded-full"></div>
+                    <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
+                </div>
                 
-                <!-- Tombol Filter Status -->
-                <div class="flex bg-gray-800 p-1 rounded-xl border border-gray-700 text-xs font-semibold">
-                    <button id="btn-filter-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white transition">Semua</button>
-                    <button id="btn-filter-belum" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Belum Bayar</button>
-                    <button id="btn-filter-lunas" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Lunas</button>
+                <!-- Filter Pills Mewah -->
+                <div class="flex bg-gray-900 p-1.5 rounded-2xl border border-gray-800 text-xs font-semibold shadow-inner">
+                    <button id="btn-filter-semua" class="px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
+                    <button id="btn-filter-belum" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200">Belum Bayar</button>
+                    <button id="btn-filter-lunas" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200">Lunas</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto glass-card rounded-xl border border-gray-700">
+            <!-- Tabel Glassmorphism -->
+            <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
                 <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-gray-800 text-gray-400">
+                    <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
                         <tr>
-                            <th class="p-3">Member</th>
-                            <th class="p-3 text-center">Sesi 1</th>
-                            <th class="p-3 text-center">Sesi 2</th>
-                            <th class="p-3 text-center">Sesi 3</th>
-                            <th class="p-3 text-center">Sesi 4</th>
-                            <th class="p-3 text-right">Total Kas</th>
-                            <th class="p-3 text-center">Status</th>
+                            <th class="p-4 font-semibold">Member</th>
+                            <th class="p-4 text-center font-semibold">Sesi 1</th>
+                            <th class="p-4 text-center font-semibold">Sesi 2</th>
+                            <th class="p-4 text-center font-semibold">Sesi 3</th>
+                            <th class="p-4 text-center font-semibold">Sesi 4</th>
+                            <th class="p-4 text-right font-semibold">Total Kas</th>
+                            <th class="p-4 text-center font-semibold">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="kas-table-body" class="divide-y divide-gray-700">
+                    <tbody id="kas-table-body" class="divide-y divide-gray-800/60">
                         <tr>
-                            <td colspan="7" class="p-5 text-center text-gray-500">Memuat data kas...</td>
+                            <td colspan="7" class="p-8 text-center text-gray-500 italic">Memuat data kas member...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -93,24 +132,23 @@
 
     </main>
 
-    <!-- SCRIPT LOGIKA KONEKSI SUPABASE -->
+    <!-- SCRIPT KONEKSI SUPABASE & LOGIKA -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // KREDENSIAL SUPABASE
+        // --- ⚠️ PERHATIKAN: GANTI KODE DI BAWAH INI DENGAN SUPABASE URL & ANON KEY YANG VALID DARI DASHBOARD ANDA ---
         const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const SUPABASE_ANON_KEY = 'MASUKKAN_ANON_KEY_YANG_VALID_DI_SINI'; // Salin anon key asli Anda dari settings -> API Supabase jika key lama error 401
 
         // Inisialisasi Klien Supabase
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allKasData = [];
 
-        // Fungsi Format Rupiah
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         };
 
-        // 1. FUNGSI AMBIL DATA TOURING (Dari tabel touring_plans / Admin)
+        // 1. AMBIL DATA TOURING
         async function fetchTouringData() {
             try {
                 const { data, error } = await db
@@ -129,7 +167,7 @@
                     
                     if (touring.tanggal_berangkat) {
                         const tglBerangkat = new Date(touring.tanggal_berangkat);
-                        document.getElementById('touring-date').innerText = tglBerangkat.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                        document.getElementById('touring-date').innerText = tglBerangkat.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                         
                         const hariIni = new Date();
                         hariIni.setHours(0, 0, 0, 0);
@@ -148,85 +186,85 @@
                         }
                     }
                 } else {
-                    document.getElementById('touring-name').innerText = "Belum Ada Jadwal Touring";
-                    document.getElementById('touring-dest').innerText = "-";
+                    document.getElementById('touring-name').innerText = "Belum Ada Jadwal";
+                    document.getElementById('touring-dest').innerText = "Belum ditentukan";
                     document.getElementById('touring-date').innerText = "-";
-                    document.getElementById('touring-countdown').innerText = "- Hari Lagi";
+                    document.getElementById('touring-countdown').innerText = "0 Hari";
                 }
             } catch (err) {
                 console.log('Error ambil touring:', err.message);
-                document.getElementById('touring-name').innerText = "Belum Ada Jadwal Touring";
+                document.getElementById('touring-name').innerText = "Gagal Memuat Jadwal";
             }
         }
 
-        // 2. FUNGSI RENDER TABEL KAS
+        // 2. RENDER TABEL KAS
         function renderKasTable(data) {
             const tableBody = document.getElementById('kas-table-body');
             tableBody.innerHTML = ''; 
 
             if(!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">Tidak ada data yang sesuai dengan filter.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Tidak ada data yang sesuai dengan filter.</td></tr>';
                 return;
             }
 
             data.forEach(row => {
-                const s1 = row.lunas_sesi_1 > 0 ? '✅' : '❌';
-                const s2 = row.lunas_sesi_2 > 0 ? '✅' : '❌';
-                const s3 = row.lunas_sesi_3 > 0 ? '✅' : '❌';
-                const s4 = row.lunas_sesi_4 > 0 ? '✅' : '❌';
+                const s1 = row.lunas_sesi_1 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
+                const s2 = row.lunas_sesi_2 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
+                const s3 = row.lunas_sesi_3 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
+                const s4 = row.lunas_sesi_4 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
                 
                 const statusBadge = row.status_final === 'LUNAS 100%' 
-                    ? `<span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/30">LUNAS</span>` 
-                    : `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">BELUM</span>`;
+                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20 shadow-sm">LUNAS</span>` 
+                    : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/20 shadow-sm">BELUM</span>`;
 
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
                 tr.innerHTML = `
-                    <td class="p-3">
-                        <div class="font-semibold text-gray-200">${row.nama_lengkap}</div>
-                        <div class="text-xs text-gray-500">NRA: ${row.nra || '-'}</div>
+                    <td class="p-4">
+                        <div class="font-bold text-gray-100">${row.nama_lengkap}</div>
+                        <div class="text-xs text-gray-500 font-mono">NRA: ${row.nra || '-'}</div>
                     </td>
-                    <td class="p-3 text-center">${s1}</td>
-                    <td class="p-3 text-center">${s2}</td>
-                    <td class="p-3 text-center">${s3}</td>
-                    <td class="p-3 text-center">${s4}</td>
-                    <td class="p-3 text-right font-mono text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
-                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-4 text-center">${s1}</td>
+                    <td class="p-4 text-center">${s2}</td>
+                    <td class="p-4 text-center">${s3}</td>
+                    <td class="p-4 text-center">${s4}</td>
+                    <td class="p-4 text-right font-mono font-semibold text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
+                    <td class="p-4 text-center">${statusBadge}</td>
                 `;
                 tableBody.appendChild(tr);
             });
         }
 
-        // 3. FUNGSI FILTER KAS
+        // 3. FILTER KAS
         function filterKas(type) {
             const btnSemua = document.getElementById('btn-filter-semua');
             const btnBelum = document.getElementById('btn-filter-belum');
             const btnLunas = document.getElementById('btn-filter-lunas');
 
             [btnSemua, btnBelum, btnLunas].forEach(btn => {
-                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition";
+                btn.className = "px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200";
             });
 
             let filteredData = allKasData;
 
             if (type === 'belum') {
-                btnBelum.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+                btnBelum.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
                 filteredData = allKasData.filter(row => row.status_final !== 'LUNAS 100%');
             } else if (type === 'lunas') {
-                btnLunas.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+                btnLunas.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
                 filteredData = allKasData.filter(row => row.status_final === 'LUNAS 100%');
             } else {
-                btnSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+                btnSemua.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
             }
 
             renderKasTable(filteredData);
         }
 
-        // Pasang Event Listener untuk Tombol Filter
         document.getElementById('btn-filter-semua').addEventListener('click', () => filterKas('semua'));
         document.getElementById('btn-filter-belum').addEventListener('click', () => filterKas('belum'));
         document.getElementById('btn-filter-lunas').addEventListener('click', () => filterKas('lunas'));
 
-        // 4. FUNGSI AMBIL DATA REKAP KAS MEMBER
+        // 4. AMBIL DATA KAS
         async function fetchKasData() {
             try {
                 const { data, error } = await db
@@ -240,11 +278,10 @@
                 renderKasTable(allKasData);
             } catch (err) {
                 console.error("Error mengambil rekap kas: ", err.message);
-                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-3 text-center text-red-400">Gagal memuat data kas. Pastikan database/view aman.</td></tr>`;
+                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400 italic">Gagal memuat data kas. Periksa Anon Key Supabase Anda.</td></tr>`;
             }
         }
 
-        // Eksekusi fungsi saat halaman dimuat
         fetchTouringData();
         fetchKasData();
     });
