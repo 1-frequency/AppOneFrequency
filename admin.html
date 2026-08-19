@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M-Banking Admin - Komunitas Motor</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-950 text-white min-h-screen pb-20">
@@ -14,90 +12,106 @@
     <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 flex justify-between items-center">
         <h1 class="text-lg font-bold text-orange-500">M-BANKING ADMIN</h1>
-        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">Dashboard Utama</a>
+        <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">Dashboard</a>
     </header>
 
     <!-- Menu Tabs -->
-    <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800 max-w-md mx-auto mt-4 rounded-2xl">
-        <button id="btn-keuangan" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
-        <button id="btn-member" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
-        <button id="btn-touring" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
+    <div class="flex bg-slate-900 p-2 gap-1 border-b border-slate-800 max-w-lg mx-auto mt-4 rounded-2xl text-[10px] sm:text-xs">
+        <button id="btn-keuangan" class="tab-btn flex-1 py-2 rounded-xl bg-orange-600 font-bold transition">Keuangan</button>
+        <button id="btn-riwayat" class="tab-btn flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-bold transition">Riwayat</button>
+        <button id="btn-member" class="tab-btn flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-bold transition">Member</button>
+        <button id="btn-touring" class="tab-btn flex-1 py-2 rounded-xl bg-slate-800 text-slate-400 font-bold transition">Touring</button>
     </div>
 
-    <main class="max-w-md mx-auto p-4 space-y-6 mt-2">
-        <!-- TAB KEUANGAN -->
+    <main class="max-w-lg mx-auto p-4 space-y-6 mt-2">
+        <!-- TAB 1: KEUANGAN -->
         <div id="tab-keuangan" class="page-tab space-y-6">
-            <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-6 shadow-xl text-white">
-                <p class="text-xs uppercase tracking-wider opacity-80">Total Saldo Kas Komunitas</p>
+            <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-6 shadow-xl">
+                <p class="text-xs uppercase tracking-wider opacity-80">Total Saldo Kas</p>
                 <h2 id="total-saldo" class="text-3xl font-extrabold mt-1">Rp 0</h2>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <button id="btn-modal-masuk" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
-                <button id="btn-modal-keluar" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
-            </div>
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-slate-300">Riwayat Kas</h3>
-                <div id="history-list" class="space-y-3"></div>
+                <button id="btn-modal-masuk" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm">+ Uang Masuk</button>
+                <button id="btn-modal-keluar" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm">- Uang Keluar</button>
             </div>
         </div>
 
-        <!-- TAB MEMBER & TOURING (Hidden by default) -->
-        <div id="tab-member" class="page-tab space-y-6 hidden">...</div>
-        <div id="tab-touring" class="page-tab space-y-6 hidden">...</div>
+        <!-- TAB 2: RIWAYAT -->
+        <div id="tab-riwayat" class="page-tab space-y-6 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Riwayat Pemasukan -->
+                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800">
+                    <h3 class="font-bold text-emerald-400 mb-4 flex items-center gap-2">Pemasukan</h3>
+                    <div id="list-masuk" class="space-y-3"></div>
+                </div>
+                <!-- Riwayat Pengeluaran -->
+                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800">
+                    <h3 class="font-bold text-rose-400 mb-4 flex items-center gap-2">Pengeluaran</h3>
+                    <div id="list-keluar" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MEMBER -->
+        <div id="tab-member" class="page-tab space-y-6 hidden">
+            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800">
+                <h3 class="font-bold mb-4">Member</h3>
+                <div id="member-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TOURING -->
+        <div id="tab-touring" class="page-tab space-y-6 hidden">
+            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800">
+                <h3 class="font-bold mb-4">Touring</h3>
+                <div id="touring-list" class="space-y-2"></div>
+            </div>
+        </div>
     </main>
 
-    <!-- Script Utama (Terisolasi) -->
+    <!-- Script Utama -->
     <script>
     (function() {
-        // Konfigurasi Supabase
-        const SUPA_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
-        
-        // Inisialisasi DB sekali saja
-        const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+        const db = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        // Fungsi Load Keuangan
-        async function loadKeuangan() {
-            try {
-                const { data, error } = await db.from('transactions').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                
-                let total = 0;
-                const list = document.getElementById('history-list');
-                list.innerHTML = '';
-                
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p class="text-xs text-slate-500 text-center">Belum ada data.</p>';
+        async function fetchData() {
+            const { data: trans } = await db.from('transactions').select('*').order('created_at', { ascending: false });
+            
+            // Render Saldo
+            let total = 0;
+            const listMasuk = document.getElementById('list-masuk');
+            const listKeluar = document.getElementById('list-keluar');
+            listMasuk.innerHTML = ''; 
+            listKeluar.innerHTML = '';
+
+            trans?.forEach(t => {
+                const amt = parseFloat(t.amount);
+                if (t.type === 'masuk') {
+                    total += amt;
+                    listMasuk.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl text-xs"><p class="font-bold text-emerald-400">+ Rp ${amt.toLocaleString()}</p><p class="text-slate-400">${t.category}</p></div>`;
                 } else {
-                    data.forEach(t => {
-                        const amt = parseFloat(t.amount);
-                        total += t.type === 'masuk' ? amt : -amt;
-                        list.innerHTML += `
-                            <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-2xl border border-slate-800">
-                                <div><p class="font-bold text-xs">${t.category}</p></div>
-                                <p class="font-bold text-xs ${t.type === 'masuk' ? 'text-emerald-400' : 'text-rose-400'}">
-                                    ${t.type === 'masuk' ? '+' : '-'} Rp ${amt.toLocaleString()}
-                                </p>
-                            </div>`;
-                    });
+                    total -= amt;
+                    listKeluar.innerHTML += `<div class="bg-slate-800 p-3 rounded-xl text-xs"><p class="font-bold text-rose-400">- Rp ${amt.toLocaleString()}</p><p class="text-slate-400">${t.category}</p></div>`;
                 }
-                document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
-            } catch (err) {
-                console.error("Gagal load data:", err);
-            }
+            });
+            document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
         }
 
-        // Event Listeners (DOM Ready)
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("App Initialized");
-            loadKeuangan();
-
-            // Tab Switcher
+            fetchData();
+            
+            // Tab Logic
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = e.target.id.replace('btn-', '');
                     document.querySelectorAll('.page-tab').forEach(t => t.classList.add('hidden'));
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('bg-orange-600'); 
+                        b.classList.add('bg-slate-800', 'text-slate-400');
+                    });
                     document.getElementById('tab-' + id)?.classList.remove('hidden');
+                    e.target.classList.add('bg-orange-600');
+                    e.target.classList.remove('bg-slate-800', 'text-slate-400');
                 });
             });
         });
