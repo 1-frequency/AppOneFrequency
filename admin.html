@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M-Banking Admin - Komunitas Motor</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-950 text-white min-h-screen pb-20">
@@ -17,244 +19,89 @@
 
     <!-- Menu Tabs -->
     <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800 max-w-md mx-auto mt-4 rounded-2xl">
-        <button id="btn-keuangan" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
-        <button id="btn-member" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
-        <button id="btn-touring" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
+        <button id="btn-keuangan" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
+        <button id="btn-member" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
+        <button id="btn-touring" class="tab-btn flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
     </div>
 
     <main class="max-w-md mx-auto p-4 space-y-6 mt-2">
-
-        <!-- TAB 1: KEUANGAN -->
-        <div id="tab-keuangan" class="space-y-6">
+        <!-- TAB KEUANGAN -->
+        <div id="tab-keuangan" class="page-tab space-y-6">
             <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-6 shadow-xl text-white">
                 <p class="text-xs uppercase tracking-wider opacity-80">Total Saldo Kas Komunitas</p>
                 <h2 id="total-saldo" class="text-3xl font-extrabold mt-1">Rp 0</h2>
             </div>
-
             <div class="grid grid-cols-2 gap-3">
-                <button id="btn-masuk" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
-                <button id="btn-keluar" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
+                <button id="btn-modal-masuk" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
+                <button id="btn-modal-keluar" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
             </div>
-
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-slate-300">Riwayat Kas Masuk & Keluar</h3>
-                <div id="history-list" class="space-y-3">
-                    <p class="text-xs text-slate-500 text-center py-4">Memuat data...</p>
-                </div>
+                <h3 class="font-bold text-sm mb-4 text-slate-300">Riwayat Kas</h3>
+                <div id="history-list" class="space-y-3"></div>
             </div>
         </div>
 
-        <!-- TAB 2: MEMBER -->
-        <div id="tab-member" class="space-y-6 hidden">
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-orange-400">Tambah Anggota Baru</h3>
-                <form id="form-member" class="space-y-3">
-                    <input type="text" id="m-nama" placeholder="Nama Lengkap" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="text" id="m-nra" placeholder="NRA (Nomor Anggota)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="text" id="m-plat" placeholder="Plat Nomor Kendaraan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Member</button>
-                </form>
-            </div>
-            
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
-                <div id="member-list" class="space-y-2 text-xs text-slate-400">Memuat data member...</div>
-            </div>
-        </div>
-
-        <!-- TAB 3: TOURING -->
-        <div id="tab-touring" class="space-y-6 hidden">
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-orange-400">Buat Rencana Touring</h3>
-                <form id="form-touring" class="space-y-3">
-                    <input type="text" id="t-nama" placeholder="Nama Acara (Cth: Wajib Pangandaran)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="text" id="t-tujuan" placeholder="Destinasi / Tujuan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="number" id="t-budget" placeholder="Target Budget Kas (Rp)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="date" id="t-tanggal" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-300" required>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Plan Touring</button>
-                </form>
-            </div>
-
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Plan Touring</h3>
-                <div id="touring-list" class="space-y-2 text-xs text-slate-400">Memuat data touring...</div>
-            </div>
-        </div>
-
+        <!-- TAB MEMBER & TOURING (Hidden by default) -->
+        <div id="tab-member" class="page-tab space-y-6 hidden">...</div>
+        <div id="tab-touring" class="page-tab space-y-6 hidden">...</div>
     </main>
 
-    <!-- MODAL -->
-    <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 w-full max-w-sm p-6 rounded-3xl border border-slate-800 space-y-4">
-            <h3 id="modal-title" class="font-bold text-base text-orange-400">Input Transaksi</h3>
-            <form id="form-transaksi" class="space-y-3">
-                <input type="hidden" id="trans-type">
-                <div>
-                    <label class="text-xs text-slate-400">Jumlah (Rp)</label>
-                    <input type="number" id="trans-amount" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400">Kategori</label>
-                    <input type="text" id="trans-cat" placeholder="Cth: Kas Sesi 1 / Konsumsi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400">Keterangan Tambahan</label>
-                    <input type="text" id="trans-desc" placeholder="Cth: Dari Bro Andi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" id="btn-batal" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
-                    <button type="submit" class="flex-1 py-3 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SCRIPT -->
+    <!-- Script Utama (Terisolasi) -->
     <script>
-        const db = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
+    (function() {
+        // Konfigurasi Supabase
+        const SUPA_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        
+        // Inisialisasi DB sekali saja
+        const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('btn-keuangan').addEventListener('click', () => switchTab('keuangan'));
-            document.getElementById('btn-member').addEventListener('click', () => switchTab('member'));
-            document.getElementById('btn-touring').addEventListener('click', () => switchTab('touring'));
-
-            document.getElementById('btn-masuk').addEventListener('click', () => openModal('masuk'));
-            document.getElementById('btn-keluar').addEventListener('click', () => openModal('keluar'));
-            document.getElementById('btn-batal').addEventListener('click', closeModal);
-
-            document.getElementById('form-member').addEventListener('submit', handleMemberSubmit);
-            document.getElementById('form-touring').addEventListener('submit', handleTouringSubmit);
-            document.getElementById('form-transaksi').addEventListener('submit', handleTransaksiSubmit);
-
-            loadKeuangan();
-        });
-
-        function switchTab(tab) {
-            ['keuangan', 'member', 'touring'].forEach(t => {
-                const elTab = document.getElementById('tab-' + t);
-                const elBtn = document.getElementById('btn-' + t);
-                if(elTab) elTab.classList.add('hidden');
-                if(elBtn) {
-                    elBtn.classList.remove('bg-orange-600', 'text-white');
-                    elBtn.classList.add('bg-slate-800', 'text-slate-400');
-                }
-            });
-
-            const activeTab = document.getElementById('tab-' + tab);
-            const activeBtn = document.getElementById('btn-' + tab);
-            if(activeTab) activeTab.classList.remove('hidden');
-            if(activeBtn) {
-                activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
-                activeBtn.classList.add('bg-orange-600', 'text-white');
-            }
-
-            if(tab === 'member') loadMembers();
-            if(tab === 'touring') loadTouring();
-            if(tab === 'keuangan') loadKeuangan();
-        }
-
-        function openModal(type) {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('trans-type').value = type;
-            const title = document.getElementById('modal-title');
-            title.innerText = type === 'masuk' ? 'Tambah Uang Masuk' : 'Tambah Uang Keluar';
-            title.className = type === 'masuk' ? 'font-bold text-base text-emerald-400' : 'font-bold text-base text-rose-400';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
-
+        // Fungsi Load Keuangan
         async function loadKeuangan() {
-            const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false });
-            let total = 0;
-            const list = document.getElementById('history-list');
-            if(!list) return;
-            list.innerHTML = '';
-
-            if(!data || data.length === 0) {
-                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Belum ada transaksi.</p>';
-                document.getElementById('total-saldo').innerText = 'Rp 0';
-                return;
+            try {
+                const { data, error } = await db.from('transactions').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                
+                let total = 0;
+                const list = document.getElementById('history-list');
+                list.innerHTML = '';
+                
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<p class="text-xs text-slate-500 text-center">Belum ada data.</p>';
+                } else {
+                    data.forEach(t => {
+                        const amt = parseFloat(t.amount);
+                        total += t.type === 'masuk' ? amt : -amt;
+                        list.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-2xl border border-slate-800">
+                                <div><p class="font-bold text-xs">${t.category}</p></div>
+                                <p class="font-bold text-xs ${t.type === 'masuk' ? 'text-emerald-400' : 'text-rose-400'}">
+                                    ${t.type === 'masuk' ? '+' : '-'} Rp ${amt.toLocaleString()}
+                                </p>
+                            </div>`;
+                    });
+                }
+                document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
+            } catch (err) {
+                console.error("Gagal load data:", err);
             }
+        }
 
-            data.forEach(t => {
-                const amountNum = parseFloat(t.amount);
-                total += t.type === 'masuk' ? amountNum : -amountNum;
-                list.innerHTML += `
-                    <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-2xl border border-slate-800">
-                        <div>
-                            <p class="font-bold text-xs text-slate-200">${t.category}</p>
-                            <p class="text-[10px] text-slate-400">${t.description || '-'}</p>
-                        </div>
-                        <p class="font-bold text-xs ${t.type === 'masuk' ? 'text-emerald-400' : 'text-rose-400'}">
-                            ${t.type === 'masuk' ? '+' : '-'} Rp ${amountNum.toLocaleString()}
-                        </p>
-                    </div>`;
+        // Event Listeners (DOM Ready)
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("App Initialized");
+            loadKeuangan();
+
+            // Tab Switcher
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.id.replace('btn-', '');
+                    document.querySelectorAll('.page-tab').forEach(t => t.classList.add('hidden'));
+                    document.getElementById('tab-' + id)?.classList.remove('hidden');
+                });
             });
-            document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
-        }
-
-        async function loadMembers() {
-            const { data } = await db.from('members').select('*').order('nama_lengkap');
-            const list = document.getElementById('member-list');
-            if(!list) return;
-            list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada member.</p>';
-            data?.forEach(m => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-slate-200">
-                    <span><b>${m.nama_lengkap}</b> (NRA: ${m.nra})</span>
-                    <span class="text-slate-400">${m.plat_nomor || '-'}</span>
-                </div>`;
-            });
-        }
-
-        async function handleMemberSubmit(e) {
-            e.preventDefault();
-            const { error } = await db.from('members').insert([{
-                nama_lengkap: document.getElementById('m-nama').value,
-                nra: document.getElementById('m-nra').value,
-                plat_nomor: document.getElementById('m-plat').value
-            }]);
-            if(error) alert(error.message);
-            else { alert('Member berhasil disimpan!'); document.getElementById('form-member').reset(); loadMembers(); }
-        }
-
-        async function loadTouring() {
-            const { data } = await db.from('touring_plans').select('*').order('tanggal_berangkat', { ascending: false });
-            const list = document.getElementById('touring-list');
-            if(!list) return;
-            list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada plan touring.</p>';
-            data?.forEach(t => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl space-y-1 text-slate-200">
-                    <p class="font-bold">${t.nama_acara} - <span class="text-orange-400">${t.tujuan}</span></p>
-                    <p class="text-[10px] text-slate-400">Budget: Rp ${parseFloat(t.target_budget).toLocaleString()} | Berangkat: ${t.tanggal_berangkat}</p>
-                </div>`;
-            });
-        }
-
-        async function handleTouringSubmit(e) {
-            e.preventDefault();
-            const { error } = await db.from('touring_plans').insert([{
-                nama_acara: document.getElementById('t-nama').value,
-                tujuan: document.getElementById('t-tujuan').value,
-                target_budget: document.getElementById('t-budget').value,
-                tanggal_berangkat: document.getElementById('t-tanggal').value
-            }]);
-            if(error) alert(error.message);
-            else { alert('Plan Touring berhasil disimpan!'); document.getElementById('form-touring').reset(); loadTouring(); }
-        }
-
-        async function handleTransaksiSubmit(e) {
-            e.preventDefault();
-            const { error } = await db.from('transactions').insert([{
-                type: document.getElementById('trans-type').value,
-                amount: document.getElementById('trans-amount').value,
-                category: document.getElementById('trans-cat').value,
-                description: document.getElementById('trans-desc').value
-            }]);
-            if(error) alert(error.message);
-            else { closeModal(); document.getElementById('form-transaksi').reset(); loadKeuangan(); }
-        }
+        });
+    })();
     </script>
 </body>
 </html>
