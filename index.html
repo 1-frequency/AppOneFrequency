@@ -54,11 +54,21 @@
             </div>
         </section>
 
-        <!-- SECTION 2: REKAP KAS 4 SESI -->
-        <section>
-            <h3 class="text-lg font-bold mb-3 flex items-center">
-                <span class="bg-orange-500 w-2 h-6 mr-2 rounded"></span> Rekap Kas Member (4 Sesi)
-            </h3>
+        <!-- SECTION 2: REKAP KAS & FILTER STATUS -->
+        <section class="space-y-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <h3 class="text-lg font-bold flex items-center">
+                    <span class="bg-orange-500 w-2 h-6 mr-2 rounded"></span> Rekap Kas Member (4 Sesi)
+                </h3>
+                
+                <!-- Tombol Filter Status -->
+                <div class="flex bg-gray-800 p-1 rounded-xl border border-gray-700 text-xs font-semibold">
+                    <button onclick="filterKas('semua')" id="btn-filter-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white transition">Semua</button>
+                    <button onclick="filterKas('belum')" id="btn-filter-belum" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Belum Bayar</button>
+                    <button onclick="filterKas('lunas')" id="btn-filter-lunas" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Lunas</button>
+                </div>
+            </div>
+
             <div class="overflow-x-auto glass-card rounded-xl border border-gray-700">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-gray-800 text-gray-400">
@@ -86,11 +96,13 @@
     <!-- SCRIPT LOGIKA KONEKSI SUPABASE -->
     <script>
         // KREDENSIAL SUPABASE
-        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';[cite: 1]
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';[cite: 1]
 
         // Inisialisasi Klien Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allKasData = []; // Menyimpan data mentah untuk kebutuhan filter
 
         // Fungsi Format Rupiah
         const formatRupiah = (angka) => {
@@ -108,7 +120,7 @@
                     .limit(1)
                     .single();
 
-                if (error && error.code !== 'PGRST116') throw error; // Abaikan error jika data kosong
+                if (error && error.code !== 'PGRST116') throw error; 
 
                 if (data) {
                     document.getElementById('touring-name').innerText = data.nama_acara;
@@ -132,7 +144,70 @@
             }
         }
 
-        // FUNGSI AMBIL DATA REKAP KAS MEMBER
+        // FUNGSI RENDER TABEL KAS
+        function renderKasTable(data) {
+            const tableBody = document.getElementById('kas-table-body');
+            tableBody.innerHTML = ''; 
+
+            if(!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">Tidak ada data yang sesuai dengan filter.</td></tr>';
+                return;
+            }
+
+            data.forEach(row => {
+                const s1 = row.lunas_sesi_1 > 0 ? '✅' : '❌';
+                const s2 = row.lunas_sesi_2 > 0 ? '✅' : '❌';
+                const s3 = row.lunas_sesi_3 > 0 ? '✅' : '❌';
+                const s4 = row.lunas_sesi_4 > 0 ? '✅' : '❌';
+                
+                const statusBadge = row.status_final === 'LUNAS 100%' 
+                    ? `<span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/30">LUNAS</span>` 
+                    : `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">BELUM</span>`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-semibold text-gray-200">${row.nama_lengkap}</div>
+                        <div class="text-xs text-gray-500">NRA: ${row.nra || '-'}</div>
+                    </td>
+                    <td class="p-3 text-center">${s1}</td>
+                    <td class="p-3 text-center">${s2}</td>
+                    <td class="p-3 text-center">${s3}</td>
+                    <td class="p-3 text-center">${s4}</td>
+                    <td class="p-3 text-right font-mono text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // FUNGSI FILTER KAS BERDASARKAN TOMBOL
+        window.filterKas = function(type) {
+            const btnSemua = document.getElementById('btn-filter-semua');
+            const btnBelum = document.getElementById('btn-filter-belum');
+            const btnLunas = document.getElementById('btn-filter-lunas');
+
+            // Reset style tombol aktif
+            [btnSemua, btnBelum, btnLunas].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition";
+            });
+
+            let filteredData = allKasData;
+
+            if (type === 'belum') {
+                btnBelum.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+                filteredData = allKasData.filter(row => row.status_final !== 'LUNAS 100%');
+            } else if (type === 'lunas') {
+                btnLunas.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+                filteredData = allKasData.filter(row => row.status_final === 'LUNAS 100%');
+            } else {
+                btnSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white transition";
+            }
+
+            renderKasTable(filteredData);
+        }
+
+        // FUNGSI AMBIL DATA REKAP KAS MEMBER DARI SUPABASE
         async function fetchKasData() {
             try {
                 const { data, error } = await supabase
@@ -142,39 +217,8 @@
 
                 if (error) throw error;
 
-                const tableBody = document.getElementById('kas-table-body');
-                tableBody.innerHTML = ''; 
-
-                if(data.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="p-5 text-center text-gray-500">Belum ada data member. Tambahkan data via Supabase.</td></tr>';
-                    return;
-                }
-
-                data.forEach(row => {
-                    const s1 = row.lunas_sesi_1 > 0 ? '✅' : '❌';
-                    const s2 = row.lunas_sesi_2 > 0 ? '✅' : '❌';
-                    const s3 = row.lunas_sesi_3 > 0 ? '✅' : '❌';
-                    const s4 = row.lunas_sesi_4 > 0 ? '✅' : '❌';
-                    
-                    const statusBadge = row.status_final === 'LUNAS 100%' 
-                        ? `<span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs font-bold border border-green-500/30">LUNAS</span>` 
-                        : `<span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">BELUM</span>`;
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="p-3">
-                            <div class="font-semibold text-gray-200">${row.nama_lengkap}</div>
-                            <div class="text-xs text-gray-500">NRA: ${row.nra || '-'}</div>
-                        </td>
-                        <td class="p-3 text-center">${s1}</td>
-                        <td class="p-3 text-center">${s2}</td>
-                        <td class="p-3 text-center">${s3}</td>
-                        <td class="p-3 text-center">${s4}</td>
-                        <td class="p-3 text-right font-mono text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
-                        <td class="p-3 text-center">${statusBadge}</td>
-                    `;
-                    tableBody.appendChild(tr);
-                });
+                allKasData = data || [];
+                renderKasTable(allKasData);
             } catch (err) {
                 console.error("Error mengambil rekap kas: ", err.message);
                 document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-3 text-center text-red-400">Gagal memuat data: pastikan RLS Supabase sudah disetting (Public Read).</td></tr>`;
