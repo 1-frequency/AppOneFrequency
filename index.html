@@ -96,13 +96,13 @@
     <!-- SCRIPT LOGIKA KONEKSI SUPABASE -->
     <script>
         // KREDENSIAL SUPABASE
-        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';[cite: 1]
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';[cite: 1]
+        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
         // Inisialisasi Klien Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let allKasData = []; // Menyimpan data mentah untuk kebutuhan filter
+        let allKasData = [];
 
         // Fungsi Format Rupiah
         const formatRupiah = (angka) => {
@@ -187,7 +187,6 @@
             const btnBelum = document.getElementById('btn-filter-belum');
             const btnLunas = document.getElementById('btn-filter-lunas');
 
-            // Reset style tombol aktif
             [btnSemua, btnBelum, btnLunas].forEach(btn => {
                 btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition";
             });
