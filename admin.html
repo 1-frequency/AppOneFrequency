@@ -109,27 +109,23 @@
         </div>
     </div>
 
-    <!-- SCRIPT (Event Listener Aman) -->
+    <!-- SCRIPT -->
     <script>
-        const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
+        const db = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Tab Navigation Listeners
             document.getElementById('btn-keuangan').addEventListener('click', () => switchTab('keuangan'));
             document.getElementById('btn-member').addEventListener('click', () => switchTab('member'));
             document.getElementById('btn-touring').addEventListener('click', () => switchTab('touring'));
 
-            // Modal Button Listeners
             document.getElementById('btn-masuk').addEventListener('click', () => openModal('masuk'));
             document.getElementById('btn-keluar').addEventListener('click', () => openModal('keluar'));
             document.getElementById('btn-batal').addEventListener('click', closeModal);
 
-            // Form Submit Listeners
             document.getElementById('form-member').addEventListener('submit', handleMemberSubmit);
             document.getElementById('form-touring').addEventListener('submit', handleTouringSubmit);
             document.getElementById('form-transaksi').addEventListener('submit', handleTransaksiSubmit);
 
-            // Initial Load
             loadKeuangan();
         });
 
@@ -170,7 +166,7 @@
         }
 
         async function loadKeuangan() {
-            const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
+            const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false });
             let total = 0;
             const list = document.getElementById('history-list');
             if(!list) return;
@@ -200,7 +196,7 @@
         }
 
         async function loadMembers() {
-            const { data } = await supabase.from('members').select('*').order('nama_lengkap');
+            const { data } = await db.from('members').select('*').order('nama_lengkap');
             const list = document.getElementById('member-list');
             if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada member.</p>';
@@ -214,7 +210,7 @@
 
         async function handleMemberSubmit(e) {
             e.preventDefault();
-            const { error } = await supabase.from('members').insert([{
+            const { error } = await db.from('members').insert([{
                 nama_lengkap: document.getElementById('m-nama').value,
                 nra: document.getElementById('m-nra').value,
                 plat_nomor: document.getElementById('m-plat').value
@@ -224,7 +220,7 @@
         }
 
         async function loadTouring() {
-            const { data } = await supabase.from('touring_plans').select('*').order('tanggal_berangkat', { ascending: false });
+            const { data } = await db.from('touring_plans').select('*').order('tanggal_berangkat', { ascending: false });
             const list = document.getElementById('touring-list');
             if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada plan touring.</p>';
@@ -238,7 +234,7 @@
 
         async function handleTouringSubmit(e) {
             e.preventDefault();
-            const { error } = await supabase.from('touring_plans').insert([{
+            const { error } = await db.from('touring_plans').insert([{
                 nama_acara: document.getElementById('t-nama').value,
                 tujuan: document.getElementById('t-tujuan').value,
                 target_budget: document.getElementById('t-budget').value,
@@ -250,7 +246,7 @@
 
         async function handleTransaksiSubmit(e) {
             e.preventDefault();
-            const { error } = await supabase.from('transactions').insert([{
+            const { error } = await db.from('transactions').insert([{
                 type: document.getElementById('trans-type').value,
                 amount: document.getElementById('trans-amount').value,
                 category: document.getElementById('trans-cat').value,
