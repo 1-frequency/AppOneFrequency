@@ -2,250 +2,98 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - M-Kas Rider</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .nav-active { background-color: #f97316; color: white; font-weight: bold; border-radius: 0.5rem; }
-        .nav-item:hover:not(.nav-active) { background-color: #1e293b; border-radius: 0.5rem; }
-    </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="bg-slate-950 text-white flex h-screen">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
-        <div class="p-6 border-b border-slate-800">
-            <h1 class="text-2xl font-bold text-orange-500">ADMIN<span class="text-white">PANEL</span></h1>
-            <p class="text-xs text-slate-400 mt-1">M-Kas Komunitas Motor</p>
+    <!-- Sidebar -->
+    <div class="w-64 bg-slate-900 p-6 space-y-6">
+        <h1 class="text-xl font-bold text-orange-500">ADMIN PANEL</h1>
+        <div class="space-y-2">
+            <button onclick="show('member')" class="w-full text-left p-3 bg-slate-800 rounded">👥 Kelola Member</button>
+            <button onclick="show('touring')" class="w-full text-left p-3 bg-slate-800 rounded">🏍️ Plan Touring</button>
+            <button onclick="show('kas')" class="w-full text-left p-3 bg-slate-800 rounded">💰 Input Kas</button>
         </div>
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <button onclick="switchTab('member')" id="nav-member" class="nav-item nav-active w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3">
-                <span>👥</span> Kelola Member
-            </button>
-            <button onclick="switchTab('touring')" id="nav-touring" class="nav-item w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3 text-slate-300">
-                <span>🏍️</span> Plan Touring
-            </button>
-            <button onclick="switchTab('kas')" id="nav-kas" class="nav-item w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-3 text-slate-300">
-                <span>💰</span> Input Kas
-            </button>
-        </nav>
-        <div class="p-4 border-t border-slate-800">
-            <a href="index.html" class="block w-full text-center bg-slate-800 hover:bg-slate-700 text-xs py-2 rounded transition-all">🔙 Kembali ke Dashboard Utama</a>
-        </div>
-    </aside>
+        <a href="index.html" class="block text-center text-sm text-slate-400">Kembali ke Dashboard</a>
+    </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 overflow-y-auto bg-slate-950 p-8">
+    <!-- Main -->
+    <div class="flex-1 p-10 overflow-y-auto">
         
-        <!-- SECTION 1: KELOLA MEMBER -->
-        <section id="sec-member" class="max-w-2xl animate-fade-in">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold">Data Member</h2>
-                <p class="text-slate-400 text-sm">Tambahkan anggota baru ke dalam database komunitas.</p>
-            </div>
-            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
-                <form id="form-member" class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Nama Lengkap</label>
-                        <input type="text" id="m-nama" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">NRA (Nomor Registrasi)</label>
-                            <input type="text" id="m-nra" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Plat Nomor Kendaraan</label>
-                            <input type="text" id="m-plat" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Tipe Motor (Opsional)</label>
-                        <input type="text" id="m-motor" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500">
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold text-sm transition-all mt-4">Simpan Member Baru</button>
-                </form>
-            </div>
-        </section>
+        <!-- Form Member -->
+        <div id="sec-member" class="space-y-4">
+            <h2 class="text-2xl font-bold">Data Member</h2>
+            <input type="text" id="m-nama" placeholder="Nama Lengkap" class="w-full p-3 bg-slate-800 rounded">
+            <input type="text" id="m-nra" placeholder="NRA" class="w-full p-3 bg-slate-800 rounded">
+            <button onclick="saveMember()" class="w-full bg-blue-600 p-3 rounded">Simpan Member</button>
+        </div>
 
-        <!-- SECTION 2: PLAN TOURING -->
-        <section id="sec-touring" class="max-w-2xl hidden animate-fade-in">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold">Rencana Touring</h2>
-                <p class="text-slate-400 text-sm">Buat agenda perjalanan baru dan tentukan target kas.</p>
-            </div>
-            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
-                <form id="form-touring" class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Nama Acara</label>
-                        <input type="text" id="t-nama" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" placeholder="Misal: Touring Akhir Tahun" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Tujuan / Destinasi</label>
-                            <input type="text" id="t-tujuan" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Target Budget Kas (Rp)</label>
-                            <input type="number" id="t-budget" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" required>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Titik Kumpul (Tikum)</label>
-                            <input type="text" id="t-tikum" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Tanggal Berangkat</label>
-                            <input type="date" id="t-tanggal" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-slate-300" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-bold text-sm transition-all mt-4">Simpan Rencana Touring</button>
-                </form>
-            </div>
-        </section>
+        <!-- Form Touring -->
+        <div id="sec-touring" class="space-y-4 hidden">
+            <h2 class="text-2xl font-bold">Rencana Touring</h2>
+            <input type="text" id="t-nama" placeholder="Nama Acara" class="w-full p-3 bg-slate-800 rounded">
+            <input type="text" id="t-tujuan" placeholder="Tujuan" class="w-full p-3 bg-slate-800 rounded">
+            <input type="number" id="t-budget" placeholder="Target Budget" class="w-full p-3 bg-slate-800 rounded">
+            <input type="date" id="t-tanggal" class="w-full p-3 bg-slate-800 rounded">
+            <button onclick="saveTouring()" class="w-full bg-indigo-600 p-3 rounded">Simpan Touring</button>
+        </div>
 
-        <!-- SECTION 3: INPUT KAS -->
-        <section id="sec-kas" class="max-w-2xl hidden animate-fade-in">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold">Input Kas & Transaksi</h2>
-                <p class="text-slate-400 text-sm">Catat pembayaran kas anggota berdasarkan sesi.</p>
-            </div>
-            <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
-                <form id="form-kas" class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Pilih Member</label>
-                        <select id="k-member" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-slate-200" required>
-                            <option value="">-- Memuat Data... --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Alokasi Rencana Touring</label>
-                        <select id="k-touring" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-slate-200" required>
-                            <option value="">-- Memuat Data... --</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Jumlah Bayar (Rp)</label>
-                            <input type="number" id="k-jumlah" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Sesi Pembayaran</label>
-                            <select id="k-sesi" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 text-slate-200" required>
-                                <option value="1">Sesi 1 (DP)</option>
-                                <option value="2">Sesi 2</option>
-                                <option value="3">Sesi 3</option>
-                                <option value="4">Sesi 4 (Lunas)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Link Bukti Transfer</label>
-                        <input type="text" id="k-bukti" value="Verifikasi Tunai" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500">
-                    </div>
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-bold text-sm transition-all mt-4">Input Pembayaran Kas</button>
-                </form>
-            </div>
-        </section>
+        <!-- Form Kas -->
+        <div id="sec-kas" class="space-y-4 hidden">
+            <h2 class="text-2xl font-bold">Input Kas</h2>
+            <select id="k-member" class="w-full p-3 bg-slate-800 rounded text-white"></select>
+            <select id="k-touring" class="w-full p-3 bg-slate-800 rounded text-white"></select>
+            <input type="number" id="k-jumlah" placeholder="Jumlah Bayar" class="w-full p-3 bg-slate-800 rounded">
+            <select id="k-sesi" class="w-full p-3 bg-slate-800 rounded text-white">
+                <option value="1">Sesi 1</option><option value="2">Sesi 2</option>
+                <option value="3">Sesi 3</option><option value="4">Sesi 4</option>
+            </select>
+            <button onclick="saveKas()" class="w-full bg-green-600 p-3 rounded">Input Pembayaran</button>
+        </div>
+    </div>
 
-    </main>
-
-    <!-- LOGIKA JAVASCRIPT -->
     <script>
-        // KONEKSI SUPABASE
         const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        // FUNGSI GANTI MENU / TAB
-        function switchTab(tabName) {
-            // Sembunyikan semua section
+        function show(id) {
             document.getElementById('sec-member').classList.add('hidden');
             document.getElementById('sec-touring').classList.add('hidden');
             document.getElementById('sec-kas').classList.add('hidden');
-            
-            // Reset warna tombol nav
-            document.getElementById('nav-member').classList.remove('nav-active', 'text-white');
-            document.getElementById('nav-member').classList.add('text-slate-300');
-            document.getElementById('nav-touring').classList.remove('nav-active', 'text-white');
-            document.getElementById('nav-touring').classList.add('text-slate-300');
-            document.getElementById('nav-kas').classList.remove('nav-active', 'text-white');
-            document.getElementById('nav-kas').classList.add('text-slate-300');
-
-            // Tampilkan section yang dipilih
-            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
-            
-            // Beri warna aktif pada tombol nav
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            activeNav.classList.add('nav-active', 'text-white');
-            activeNav.classList.remove('text-slate-300');
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            if(id === 'kas') loadDropdowns();
         }
 
-        // FUNGSI AMBIL DATA UNTUK DROPDOWN
-        async function loadDropdownData() {
-            // Ambil Member
-            const { data: members } = await supabase.from('members').select('id, nama_lengkap, nra').order('nama_lengkap');
-            const mSelect = document.getElementById('k-member');
-            mSelect.innerHTML = '<option value="">-- Pilih Member --</option>';
-            members?.forEach(m => mSelect.innerHTML += `<option value="${m.id}">${m.nama_lengkap} (NRA: ${m.nra})</option>`);
-            
-            // Ambil Touring Plan
-            const { data: touring } = await supabase.from('touring_plans').select('id, nama_acara').order('created_at', { ascending: false });
-            const tSelect = document.getElementById('k-touring');
-            tSelect.innerHTML = '<option value="">-- Pilih Rencana Touring --</option>';
-            touring?.forEach(t => tSelect.innerHTML += `<option value="${t.id}">${t.nama_acara}</option>`);
+        async function loadDropdowns() {
+            const { data: m } = await supabase.from('members').select('id, nama_lengkap');
+            const { data: t } = await supabase.from('touring_plans').select('id, nama_acara');
+            const mSel = document.getElementById('k-member');
+            const tSel = document.getElementById('k-touring');
+            mSel.innerHTML = m.map(x => `<option value="${x.id}">${x.nama_lengkap}</option>`).join('');
+            tSel.innerHTML = t.map(x => `<option value="${x.id}">${x.nama_acara}</option>`).join('');
         }
 
-        // SUBMIT: TAMBAH MEMBER
-        document.getElementById('form-member').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('members').insert([{ 
-                nama_lengkap: document.getElementById('m-nama').value, 
-                nra: document.getElementById('m-nra').value, 
-                plat_nomor: document.getElementById('m-plat').value,
-                tipe_motor: document.getElementById('m-motor').value 
-            }]);
-            
-            if(error) alert('Error: ' + error.message);
-            else { alert('Member berhasil ditambahkan!'); document.getElementById('form-member').reset(); loadDropdownData(); }
-        };
+        async function saveMember() {
+            await supabase.from('members').insert([{ nama_lengkap: document.getElementById('m-nama').value, nra: document.getElementById('m-nra').value }]);
+            alert('Member Tersimpan!'); location.reload();
+        }
 
-        // SUBMIT: PLAN TOURING
-        document.getElementById('form-touring').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('touring_plans').insert([{ 
-                nama_acara: document.getElementById('t-nama').value, 
-                tujuan: document.getElementById('t-tujuan').value, 
-                target_budget: document.getElementById('t-budget').value,
-                titik_kumpul: document.getElementById('t-tikum').value,
-                tanggal_berangkat: document.getElementById('t-tanggal').value,
-                status_acara: 'rencana'
-            }]);
-            
-            if(error) alert('Error: ' + error.message);
-            else { alert('Rencana Touring berhasil disimpan!'); document.getElementById('form-touring').reset(); loadDropdownData(); }
-        };
+        async function saveTouring() {
+            await supabase.from('touring_plans').insert([{ nama_acara: document.getElementById('t-nama').value, tujuan: document.getElementById('t-tujuan').value, target_budget: document.getElementById('t-budget').value, tanggal_berangkat: document.getElementById('t-tanggal').value }]);
+            alert('Touring Tersimpan!'); location.reload();
+        }
 
-        // SUBMIT: INPUT KAS
-        document.getElementById('form-kas').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('kas_transactions').insert([{
-                member_id: document.getElementById('k-member').value,
-                touring_id: document.getElementById('k-touring').value,
+        async function saveKas() {
+            const { error } = await supabase.from('kas_transactions').insert([{ 
+                member_id: document.getElementById('k-member').value, 
+                touring_id: document.getElementById('k-touring').value, 
                 jumlah_bayar: document.getElementById('k-jumlah').value,
                 sesi_pembayaran: document.getElementById('k-sesi').value,
-                bukti_transfer_url: document.getElementById('k-bukti').value,
-                status_pembayaran: 'lunas'
+                bukti_transfer_url: 'N/A'
             }]);
-            
-            if(error) alert('Error: ' + error.message);
-            else { alert('Kas berhasil disimpan & lunas!'); document.getElementById('form-kas').reset(); }
-        };
-
-        // Inisialisasi awal saat web dibuka
-        window.onload = loadDropdownData;
+            error ? alert(error.message) : alert('Kas Berhasil!');
+        }
     </script>
 </body>
 </html>
