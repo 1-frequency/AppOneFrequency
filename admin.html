@@ -65,12 +65,9 @@
 
         <!-- TAB 3: MEMBER -->
         <div id="tab-member" class="page-tab space-y-6 hidden">
-            <!-- Tombol Trigger Modal Tambah Member -->
             <button id="btn-open-member-modal" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-2xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
                 <span>+ Tambah Member</span>
             </button>
-            
-            <!-- Daftar Member Terdaftar -->
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
                 <div id="member-list" class="space-y-2 text-xs text-slate-400 max-h-[380px] overflow-y-auto pr-1">Memuat data member...</div>
@@ -80,19 +77,51 @@
         <!-- TAB 4: TOURING -->
         <div id="tab-touring" class="page-tab space-y-6 hidden">
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-orange-400">Buat Rencana Touring</h3>
+                <h3 id="touring-form-title" class="font-bold text-sm mb-4 text-orange-400">Buat Rencana Touring</h3>
                 <form id="form-touring" class="space-y-3">
-                    <input type="text" id="t-nama" autocomplete="off" placeholder="Nama Acara (Cth: Wajib Pangandaran)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="text" id="t-tujuan" autocomplete="off" placeholder="Destinasi / Tujuan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="number" id="t-budget" autocomplete="off" placeholder="Target Budget Kas (Rp)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
-                    <input type="date" id="t-tanggal" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-300" required>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Plan Touring</button>
+                    <input type="hidden" id="t-edit-id">
+                    <div>
+                        <label class="text-xs text-slate-400">Nama Acara</label>
+                        <input type="text" id="t-nama" autocomplete="off" placeholder="Cth: Wajib Pangandaran" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Destinasi / Tujuan</label>
+                        <input type="text" id="t-tujuan" autocomplete="off" placeholder="Cth: Pantai Pangandaran" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Target Budget Kas (Rp)</label>
+                        <input type="number" id="t-budget" autocomplete="off" placeholder="Cth: 10000000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Estimasi Peserta</label>
+                            <input type="number" id="t-peserta" autocomplete="off" placeholder="Cth: 15" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Jumlah Hari</label>
+                            <input type="number" id="t-hari" autocomplete="off" placeholder="Cth: 2" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400">Tanggal Berangkat</label>
+                            <input type="date" id="t-tgl-berangkat" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1 text-slate-300" required>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400">Tanggal Pulang</label>
+                            <input type="date" id="t-tgl-pulang" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1 text-slate-300" required>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" id="btn-batal-touring" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold hidden">Batal Edit</button>
+                        <button type="submit" id="btn-submit-touring" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg transition">Simpan Plan Touring</button>
+                    </div>
                 </form>
             </div>
 
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Plan Touring</h3>
-                <div id="touring-list" class="space-y-2 text-xs text-slate-400">Memuat data touring...</div>
+                <div id="touring-list" class="space-y-2 text-xs text-slate-400 max-h-[380px] overflow-y-auto pr-1">Memuat data touring...</div>
             </div>
         </div>
 
@@ -110,7 +139,6 @@
                     <input type="number" id="trans-amount" autocomplete="off" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
 
-                <!-- Field khusus Uang Masuk -->
                 <div id="fields-masuk" class="space-y-3 hidden">
                     <div>
                         <label class="text-xs text-slate-400">Pilih Bulan & Tahun</label>
@@ -133,7 +161,6 @@
                     </div>
                 </div>
 
-                <!-- Field khusus Uang Keluar -->
                 <div id="fields-keluar" class="space-y-3 hidden">
                     <div>
                         <label class="text-xs text-slate-400">Kategori</label>
@@ -209,7 +236,6 @@
         }
 
         async function loadKeuangan() {
-            // Ambil maksimal 15 transaksi terakhir
             const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false }).limit(15);
             let total = 0;
             const listMasuk = document.getElementById('list-masuk');
@@ -304,10 +330,26 @@
             if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500 text-xs">Belum ada plan touring.</p>';
             data?.forEach(t => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl space-y-1 text-slate-200 text-xs">
-                    <p class="font-bold">${t.nama_acara} - <span class="text-orange-400">${t.tujuan}</span></p>
-                    <p class="text-[10px] text-slate-400">Budget: Rp ${parseFloat(t.target_budget).toLocaleString()} | Berangkat: ${t.tanggal_berangkat}</p>
-                </div>`;
+                const tNama = t.nama_acara ? t.nama_acara.replace(/'/g, "\\'") : '';
+                const tTujuan = t.tujuan ? t.tujuan.replace(/'/g, "\\'") : '';
+                const tBudget = t.target_budget || 0;
+                const tPeserta = t.estimasi_peserta || '-';
+                const tHari = t.jumlah_hari || '-';
+                const tBerangkat = t.tanggal_berangkat || '';
+                const tPulang = t.tanggal_pulang || '';
+
+                list.innerHTML += `
+                    <div class="bg-slate-800/60 p-3 rounded-xl flex justify-between items-center text-slate-200 text-xs border border-slate-700/50 gap-2">
+                        <div class="space-y-1 overflow-hidden flex-1">
+                            <p class="font-bold text-sm text-white">${t.nama_acara} - <span class="text-orange-400">${t.tujuan}</span></p>
+                            <p class="text-[11px] text-slate-400">Budget: Rp ${parseFloat(t.target_budget).toLocaleString()} | Peserta: ${tPeserta} Orang | ${tHari} Hari</p>
+                            <p class="text-[10px] text-slate-400">Jadwal: ${tBerangkat} s/d ${tPulang}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="window.editTouring('${t.id}', '${tNama}', '${tTujuan}', '${tBudget}', '${tPeserta}', '${tHari}', '${tBerangkat}', '${tPulang}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
+                            <button onclick="window.deleteTouring('${t.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                        </div>
+                    </div>`;
             });
         }
 
@@ -395,6 +437,36 @@
             }
         };
 
+        window.editTouring = function(id, nama, tujuan, budget, peserta, hari, berangkat, pulang) {
+            document.getElementById('t-edit-id').value = id;
+            document.getElementById('t-nama').value = nama;
+            document.getElementById('t-tujuan').value = tujuan;
+            document.getElementById('t-budget').value = budget;
+            document.getElementById('t-peserta').value = peserta;
+            document.getElementById('t-hari').value = hari;
+            document.getElementById('t-tgl-berangkat').value = berangkat;
+            document.getElementById('t-tgl-pulang').value = pulang;
+
+            document.getElementById('touring-form-title').innerText = 'Edit Rencana Touring';
+            document.getElementById('touring-form-title').className = 'font-bold text-sm mb-4 text-amber-400';
+            document.getElementById('btn-submit-touring').innerText = 'Perbarui Plan Touring';
+            document.getElementById('btn-submit-touring').className = 'flex-1 bg-amber-600 hover:bg-amber-700 py-3 rounded-xl font-bold text-sm shadow-lg transition';
+            document.getElementById('btn-batal-touring').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.deleteTouring = async function(id) {
+            if(confirm('Apakah Anda yakin ingin menghapus rencana touring ini?')) {
+                const { error } = await db.from('touring_plans').delete().eq('id', id);
+                if(error) {
+                    showNotification(error.message, 'error');
+                } else {
+                    showNotification('Plan touring berhasil dihapus!', 'success');
+                    loadTouring();
+                }
+            }
+        };
+
         window.editTransaction = async function(id, type, amount, category, description) {
             await openModal(type);
             document.getElementById('trans-edit-id').value = id;
@@ -470,6 +542,16 @@
             document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
             document.getElementById('btn-batal').addEventListener('click', closeModal);
 
+            document.getElementById('btn-batal-touring').addEventListener('click', () => {
+                document.getElementById('form-touring').reset();
+                document.getElementById('t-edit-id').value = '';
+                document.getElementById('touring-form-title').innerText = 'Buat Rencana Touring';
+                document.getElementById('touring-form-title').className = 'font-bold text-sm mb-4 text-orange-400';
+                document.getElementById('btn-submit-touring').innerText = 'Simpan Plan Touring';
+                document.getElementById('btn-submit-touring').className = 'w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg transition';
+                document.getElementById('btn-batal-touring').classList.add('hidden');
+            });
+
             document.getElementById('form-member').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const editId = document.getElementById('m-edit-id').value;
@@ -507,17 +589,37 @@
 
             document.getElementById('form-touring').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const { error } = await db.from('touring_plans').insert([{
+                const editId = document.getElementById('t-edit-id').value;
+                const touringData = {
                     nama_acara: document.getElementById('t-nama').value,
                     tujuan: document.getElementById('t-tujuan').value,
                     target_budget: document.getElementById('t-budget').value,
-                    tanggal_berangkat: document.getElementById('t-tanggal').value
-                }]);
+                    estimasi_peserta: document.getElementById('t-peserta').value,
+                    jumlah_hari: document.getElementById('t-hari').value,
+                    tanggal_berangkat: document.getElementById('t-tgl-berangkat').value,
+                    tanggal_pulang: document.getElementById('t-tgl-pulang').value
+                };
+
+                let error;
+                if (editId) {
+                    const res = await db.from('touring_plans').update(touringData).eq('id', editId);
+                    error = res.error;
+                } else {
+                    const res = await db.from('touring_plans').insert([touringData]);
+                    error = res.error;
+                }
+
                 if(error) {
                     showNotification(error.message, 'error');
                 } else { 
-                    showNotification('Plan Touring berhasil disimpan!', 'success'); 
+                    showNotification(editId ? 'Plan Touring berhasil diperbarui!' : 'Plan Touring berhasil disimpan!', 'success'); 
                     document.getElementById('form-touring').reset(); 
+                    document.getElementById('t-edit-id').value = '';
+                    document.getElementById('touring-form-title').innerText = 'Buat Rencana Touring';
+                    document.getElementById('touring-form-title').className = 'font-bold text-sm mb-4 text-orange-400';
+                    document.getElementById('btn-submit-touring').innerText = 'Simpan Plan Touring';
+                    document.getElementById('btn-submit-touring').className = 'w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-sm shadow-lg transition';
+                    document.getElementById('btn-batal-touring').classList.add('hidden');
                     loadTouring(); 
                 }
             });
