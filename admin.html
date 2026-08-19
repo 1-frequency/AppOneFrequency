@@ -113,7 +113,8 @@
     <script>
         const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        function switchTab(tab) {
+        // Daftarkan fungsi ke window secara eksplisit agar terpanggil dengan benar
+        window.switchTab = function(tab) {
             ['keuangan', 'member', 'touring'].forEach(t => {
                 const elTab = document.getElementById('tab-' + t);
                 const elBtn = document.getElementById('btn-' + t);
@@ -137,7 +138,7 @@
             if(tab === 'keuangan') loadKeuangan();
         }
 
-        function openModal(type) {
+        window.openModal = function(type) {
             document.getElementById('modal').classList.remove('hidden');
             document.getElementById('trans-type').value = type;
             const title = document.getElementById('modal-title');
@@ -145,7 +146,7 @@
             title.className = type === 'masuk' ? 'font-bold text-base text-emerald-400' : 'font-bold text-base text-rose-400';
         }
 
-        function closeModal() {
+        window.closeModal = function() {
             document.getElementById('modal').classList.add('hidden');
         }
 
