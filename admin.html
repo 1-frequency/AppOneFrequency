@@ -17,9 +17,9 @@
 
     <!-- Menu Tabs -->
     <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800 max-w-md mx-auto mt-4 rounded-2xl">
-        <button id="btn-keuangan" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
-        <button id="btn-member" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
-        <button id="btn-touring" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
+        <button onclick="switchTab('keuangan')" id="btn-keuangan" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
+        <button onclick="switchTab('member')" id="btn-member" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
+        <button onclick="switchTab('touring')" id="btn-touring" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
     </div>
 
     <main class="max-w-md mx-auto p-4 space-y-6 mt-2">
@@ -32,8 +32,8 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <button id="open-masuk" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
-                <button id="open-keluar" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
+                <button onclick="openModal('masuk')" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
+                <button onclick="openModal('keluar')" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
             </div>
 
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
@@ -102,35 +102,16 @@
                     <input type="text" id="trans-desc" placeholder="Cth: Dari Bro Andi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="button" id="close-modal" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
+                    <button type="button" onclick="closeModal()" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
                     <button type="submit" class="flex-1 py-3 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPT (Menggunakan Event Listener Aman) -->
+    <!-- SCRIPT -->
     <script>
         const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Tab Navigation
-            const tabs = ['keuangan', 'member', 'touring'];
-            tabs.forEach(tab => {
-                const btn = document.getElementById('btn-' + tab);
-                if(btn) {
-                    btn.addEventListener('click', () => switchTab(tab));
-                }
-            });
-
-            // Modal Buttons
-            document.getElementById('open-masuk').addEventListener('click', () => openModal('masuk'));
-            document.getElementById('open-keluar').addEventListener('click', () => openModal('keluar'));
-            document.getElementById('close-modal').addEventListener('click', closeModal);
-
-            // Load initial data
-            loadKeuangan();
-        });
 
         function switchTab(tab) {
             ['keuangan', 'member', 'touring'].forEach(t => {
@@ -168,7 +149,6 @@
             document.getElementById('modal').classList.add('hidden');
         }
 
-        // Keuangan Logic
         async function loadKeuangan() {
             const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
             let total = 0;
@@ -199,7 +179,6 @@
             document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
         }
 
-        // Member Logic
         async function loadMembers() {
             const { data } = await supabase.from('members').select('*').order('nama_lengkap');
             const list = document.getElementById('member-list');
@@ -213,18 +192,20 @@
             });
         }
 
-        document.getElementById('form-member').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('members').insert([{
-                nama_lengkap: document.getElementById('m-nama').value,
-                nra: document.getElementById('m-nra').value,
-                plat_nomor: document.getElementById('m-plat').value
-            }]);
-            if(error) alert(error.message);
-            else { alert('Member berhasil disimpan!'); document.getElementById('form-member').reset(); loadMembers(); }
-        };
+        const formMember = document.getElementById('form-member');
+        if(formMember) {
+            formMember.onsubmit = async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.from('members').insert([{
+                    nama_lengkap: document.getElementById('m-nama').value,
+                    nra: document.getElementById('m-nra').value,
+                    plat_nomor: document.getElementById('m-plat').value
+                }]);
+                if(error) alert(error.message);
+                else { alert('Member berhasil disimpan!'); formMember.reset(); loadMembers(); }
+            };
+        }
 
-        // Touring Logic
         async function loadTouring() {
             const { data } = await supabase.from('touring_plans').select('*').order('tanggal_berangkat', { ascending: false });
             const list = document.getElementById('touring-list');
@@ -238,30 +219,37 @@
             });
         }
 
-        document.getElementById('form-touring').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('touring_plans').insert([{
-                nama_acara: document.getElementById('t-nama').value,
-                tujuan: document.getElementById('t-tujuan').value,
-                target_budget: document.getElementById('t-budget').value,
-                tanggal_berangkat: document.getElementById('t-tanggal').value
-            }]);
-            if(error) alert(error.message);
-            else { alert('Plan Touring berhasil disimpan!'); document.getElementById('form-touring').reset(); loadTouring(); }
-        };
+        const formTouring = document.getElementById('form-touring');
+        if(formTouring) {
+            formTouring.onsubmit = async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.from('touring_plans').insert([{
+                    nama_acara: document.getElementById('t-nama').value,
+                    tujuan: document.getElementById('t-tujuan').value,
+                    target_budget: document.getElementById('t-budget').value,
+                    tanggal_berangkat: document.getElementById('t-tanggal').value
+                }]);
+                if(error) alert(error.message);
+                else { alert('Plan Touring berhasil disimpan!'); formTouring.reset(); loadTouring(); }
+            };
+        }
 
-        // Transaksi Submit
-        document.getElementById('form-transaksi').onsubmit = async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from('transactions').insert([{
-                type: document.getElementById('trans-type').value,
-                amount: document.getElementById('trans-amount').value,
-                category: document.getElementById('trans-cat').value,
-                description: document.getElementById('trans-desc').value
-            }]);
-            if(error) alert(error.message);
-            else { closeModal(); document.getElementById('form-transaksi').reset(); loadKeuangan(); }
-        };
+        const formTransaksi = document.getElementById('form-transaksi');
+        if(formTransaksi) {
+            formTransaksi.onsubmit = async (e) => {
+                e.preventDefault();
+                const { error } = await supabase.from('transactions').insert([{
+                    type: document.getElementById('trans-type').value,
+                    amount: document.getElementById('trans-amount').value,
+                    category: document.getElementById('trans-cat').value,
+                    description: document.getElementById('trans-desc').value
+                }]);
+                if(error) alert(error.message);
+                else { closeModal(); formTransaksi.reset(); loadKeuangan(); }
+            };
+        }
+
+        loadKeuangan();
     </script>
 </body>
 </html>
