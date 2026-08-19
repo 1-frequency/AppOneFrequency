@@ -106,14 +106,42 @@
                     <label class="text-xs text-slate-400">Jumlah (Rp)</label>
                     <input type="number" id="trans-amount" placeholder="50000" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
-                <div>
-                    <label class="text-xs text-slate-400">Kategori</label>
-                    <input type="text" id="trans-cat" placeholder="Cth: Kas Sesi 1 / Konsumsi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+
+                <!-- Field khusus Uang Masuk -->
+                <div id="fields-masuk" class="space-y-3 hidden">
+                    <div>
+                        <label class="text-xs text-slate-400">Pilih Bulan & Tahun</label>
+                        <input type="month" id="trans-month" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1 text-slate-300">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Kategori</label>
+                        <select id="trans-cat-select" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1 text-slate-300">
+                            <option value="SESI 1">SESI 1</option>
+                            <option value="SESI 2">SESI 2</option>
+                            <option value="SESI 3">SESI 3</option>
+                            <option value="SESI 4">SESI 4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Keterangan Tambahan (Pilih Member)</label>
+                        <select id="trans-desc-select" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1 text-slate-300">
+                            <option value="">-- Memuat Member --</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="text-xs text-slate-400">Keterangan Tambahan</label>
-                    <input type="text" id="trans-desc" placeholder="Cth: Dari Bro Andi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+
+                <!-- Field khusus Uang Keluar -->
+                <div id="fields-keluar" class="space-y-3 hidden">
+                    <div>
+                        <label class="text-xs text-slate-400">Kategori</label>
+                        <input type="text" id="trans-cat-input" placeholder="Cth: Konsumsi / Perbaikan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Keterangan Tambahan</label>
+                        <input type="text" id="trans-desc-input" placeholder="Cth: Beli sparepart" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                    </div>
                 </div>
+
                 <div class="flex gap-2 pt-2">
                     <button type="button" id="btn-batal" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
                     <button type="submit" class="flex-1 py-3 bg-orange-600 hover:bg-orange-700 rounded-xl text-xs font-bold">Simpan</button>
@@ -206,12 +234,51 @@
             });
         }
 
-        function openModal(type) {
+        async function populateMemberDropdown() {
+            const select = document.getElementById('trans-desc-select');
+            if(!select) return;
+            const { data } = await db.from('members').select('*').order('nama_lengkap');
+            select.innerHTML = '<option value="">-- Pilih Member --</option>';
+            if(data && data.length > 0) {
+                data.forEach(m => {
+                    select.innerHTML += `<option value="${m.nama_lengkap} (NRA: ${m.nra})">${m.nama_lengkap} (NRA: ${m.nra})</option>`;
+                });
+            } else {
+                select.innerHTML = '<option value="">Belum ada member terdaftar</option>';
+            }
+        }
+
+        async function openModal(type) {
             document.getElementById('modal').classList.remove('hidden');
             document.getElementById('trans-type').value = type;
             const title = document.getElementById('modal-title');
-            title.innerText = type === 'masuk' ? 'Tambah Uang Masuk' : 'Tambah Uang Keluar';
-            title.className = type === 'masuk' ? 'font-bold text-base text-emerald-400' : 'font-bold text-base text-rose-400';
+            
+            const fieldsMasuk = document.getElementById('fields-masuk');
+            const fieldsKeluar = document.getElementById('fields-keluar');
+
+            if (type === 'masuk') {
+                title.innerText = 'Tambah Uang Masuk';
+                title.className = 'font-bold text-base text-emerald-400';
+                fieldsMasuk.classList.remove('hidden');
+                fieldsKeluar.classList.add('hidden');
+
+                document.getElementById('trans-month').required = true;
+                document.getElementById('trans-cat-select').required = true;
+                document.getElementById('trans-desc-select').required = true;
+                document.getElementById('trans-cat-input').required = false;
+
+                await populateMemberDropdown();
+            } else {
+                title.innerText = 'Tambah Uang Keluar';
+                title.className = 'font-bold text-base text-rose-400';
+                fieldsMasuk.classList.add('hidden');
+                fieldsKeluar.classList.remove('hidden');
+
+                document.getElementById('trans-month').required = false;
+                document.getElementById('trans-cat-select').required = false;
+                document.getElementById('trans-desc-select').required = false;
+                document.getElementById('trans-cat-input').required = true;
+            }
         }
 
         function closeModal() {
@@ -234,7 +301,6 @@
                     e.target.classList.add('bg-orange-600', 'text-white');
                     e.target.classList.remove('bg-slate-800', 'text-slate-400');
 
-                    // Load data sesuai tab yang diklik
                     if(id === 'riwayat' || id === 'keuangan') loadKeuangan();
                     if(id === 'member') loadMembers();
                     if(id === 'touring') loadTouring();
@@ -272,14 +338,34 @@
 
             document.getElementById('form-transaksi').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const type = document.getElementById('trans-type').value;
+                let category, description;
+
+                if (type === 'masuk') {
+                    const monthVal = document.getElementById('trans-month').value;
+                    const sesi = document.getElementById('trans-cat-select').value;
+                    const memberDesc = document.getElementById('trans-desc-select').value;
+
+                    category = sesi;
+                    description = `Bulan: ${monthVal} | ${memberDesc}`;
+                } else {
+                    category = document.getElementById('trans-cat-input').value;
+                    description = document.getElementById('trans-desc-input').value;
+                }
+
                 const { error } = await db.from('transactions').insert([{
-                    type: document.getElementById('trans-type').value,
+                    type: type,
                     amount: document.getElementById('trans-amount').value,
-                    category: document.getElementById('trans-cat').value,
-                    description: document.getElementById('trans-desc').value
+                    category: category,
+                    description: description
                 }]);
+
                 if(error) alert(error.message);
-                else { closeModal(); document.getElementById('form-transaksi').reset(); loadKeuangan(); }
+                else { 
+                    closeModal(); 
+                    document.getElementById('form-transaksi').reset(); 
+                    loadKeuangan(); 
+                }
             });
         });
     })();
