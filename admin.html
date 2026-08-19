@@ -341,11 +341,15 @@
             data?.forEach(t => {
                 const tNama = t.nama_acara ? t.nama_acara.replace(/'/g, "\\'") : '';
                 const tTujuan = t.tujuan ? t.tujuan.replace(/'/g, "\\'") : '';
+                const tKumpul = t.titik_kumpul ? t.titik_kumpul.replace(/'/g, "\\'") : '';
                 const tBudget = t.target_budget || 0;
-                const tPeserta = t.estimasi_peserta || '-';
-                const tHari = t.jumlah_hari || '-';
-                const tBerangkat = t.tanggal_berangkat || '';
-                const tPulang = t.tanggal_pulang || '';
+                
+                // Memotong string agar hanya mengambil tanggal (YYYY-MM-DD)
+                const tBerangkat = t.tanggal_berangkat ? t.tanggal_berangkat.split('T')[0] : '';
+                const tPulang = t.tanggal_pulang ? t.tanggal_pulang.split('T')[0] : '';
+
+                const tPeserta = t.estimasi_peserta || 0;
+                const tHari = t.jumlah_hari || 0;
 
                 list.innerHTML += `
                     <div class="bg-slate-800/60 p-3 rounded-xl flex justify-between items-center text-slate-200 text-xs border border-slate-700/50 gap-2">
@@ -355,7 +359,7 @@
                             <p class="text-[10px] text-slate-400">Jadwal: ${tBerangkat} s/d ${tPulang}</p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
-                            <button onclick="window.editTouring('${t.id}', '${tNama}', '${tTujuan}', '${tBudget}', '${tPeserta}', '${tHari}', '${tBerangkat}', '${tPulang}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
+                            <button onclick="window.editTouring('${t.id}', '${tNama}', '${tTujuan}', '${tKumpul}', '${tBudget}', '${tBerangkat}', '${tPulang}', '${tPeserta}', '${tHari}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
                             <button onclick="window.deleteTouring('${t.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Hapus</button>
                         </div>
                     </div>`;
