@@ -9,36 +9,33 @@
 </head>
 <body class="bg-slate-950 text-white min-h-screen pb-20">
 
-    <!-- Header / Navbar M-Banking Style -->
+    <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 flex justify-between items-center">
         <h1 class="text-lg font-bold text-orange-500">M-BANKING ADMIN</h1>
         <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">Dashboard Utama</a>
     </header>
 
     <!-- Menu Tabs -->
-    <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800">
-        <button onclick="switchTab('keuangan')" id="btn-keuangan" class="flex-1 py-2.5 text-xs font-bold rounded-lg bg-orange-600 text-white transition">Keuangan</button>
-        <button onclick="switchTab('member')" id="btn-member" class="flex-1 py-2.5 text-xs font-bold rounded-lg bg-slate-800 text-slate-400 transition">Member</button>
-        <button onclick="switchTab('touring')" id="btn-touring" class="flex-1 py-2.5 text-xs font-bold rounded-lg bg-slate-800 text-slate-400 transition">Touring</button>
+    <div class="flex bg-slate-900 p-2 gap-2 border-b border-slate-800 max-w-md mx-auto mt-4 rounded-2xl">
+        <button onclick="switchTab('keuangan')" id="btn-keuangan" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-orange-600 text-white transition">Keuangan</button>
+        <button onclick="switchTab('member')" id="btn-member" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Member</button>
+        <button onclick="switchTab('touring')" id="btn-touring" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-800 text-slate-400 transition">Touring</button>
     </div>
 
-    <main class="max-w-md mx-auto p-4 space-y-6">
+    <main class="max-w-md mx-auto p-4 space-y-6 mt-2">
 
-        <!-- TAB 1: KEUANGAN (MASUK & KELUAR) -->
+        <!-- TAB 1: KEUANGAN -->
         <div id="tab-keuangan" class="space-y-6">
-            <!-- Saldo Card -->
             <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl p-6 shadow-xl text-white">
                 <p class="text-xs uppercase tracking-wider opacity-80">Total Saldo Kas Komunitas</p>
                 <h2 id="total-saldo" class="text-3xl font-extrabold mt-1">Rp 0</h2>
             </div>
 
-            <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="openModal('masuk')" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">+ Uang Masuk</button>
                 <button onclick="openModal('keluar')" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-xl font-bold text-sm shadow-lg">- Uang Keluar</button>
             </div>
 
-            <!-- Riwayat Transaksi -->
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-4 text-slate-300">Riwayat Kas Masuk & Keluar</h3>
                 <div id="history-list" class="space-y-3">
@@ -61,11 +58,11 @@
             
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
-                <div id="member-list" class="space-y-2 text-xs"></div>
+                <div id="member-list" class="space-y-2 text-xs text-slate-400">Memuat data member...</div>
             </div>
         </div>
 
-        <!-- TAB 3: PLAN TOURING -->
+        <!-- TAB 3: TOURING -->
         <div id="tab-touring" class="space-y-6 hidden">
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-4 text-orange-400">Buat Rencana Touring</h3>
@@ -80,13 +77,13 @@
 
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Plan Touring</h3>
-                <div id="touring-list" class="space-y-2 text-xs"></div>
+                <div id="touring-list" class="space-y-2 text-xs text-slate-400">Memuat data touring...</div>
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL INPUT KEUANGAN -->
+    <!-- MODAL -->
     <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 w-full max-w-sm p-6 rounded-3xl border border-slate-800 space-y-4">
             <h3 id="modal-title" class="font-bold text-base text-orange-400">Input Transaksi</h3>
@@ -98,11 +95,11 @@
                 </div>
                 <div>
                     <label class="text-xs text-slate-400">Kategori</label>
-                    <input type="text" id="trans-cat" placeholder="Cth: Kas Sesi 1 / Bensin Konsumsi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
+                    <input type="text" id="trans-cat" placeholder="Cth: Kas Sesi 1 / Konsumsi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
                 </div>
                 <div>
                     <label class="text-xs text-slate-400">Keterangan Tambahan</label>
-                    <input type="text" id="trans-desc" placeholder="Cth: Pembayaran dari Bro Andi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
+                    <input type="text" id="trans-desc" placeholder="Cth: Dari Bro Andi" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1">
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeModal()" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Batal</button>
@@ -112,39 +109,52 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT UTAMA -->
+    <!-- SCRIPT -->
     <script>
         const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        // Navigasi Tab
+        // Fungsi Navigasi Tab
         function switchTab(tab) {
-            ['keuangan', 'member', 'touring'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('btn-' + t).classList.remove('bg-orange-600', 'text-white');
-                document.getElementById('btn-' + t).classList.add('bg-slate-800', 'text-slate-400');
+            const tabs = ['keuangan', 'member', 'touring'];
+            tabs.forEach(t => {
+                const elTab = document.getElementById('tab-' + t);
+                const elBtn = document.getElementById('btn-' + t);
+                if(elTab) elTab.classList.add('hidden');
+                if(elBtn) {
+                    elBtn.classList.remove('bg-orange-600', 'text-white');
+                    elBtn.classList.add('bg-slate-800', 'text-slate-400');
+                }
             });
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            document.getElementById('btn-' + tab).classList.remove('bg-slate-800', 'text-slate-400');
-            document.getElementById('btn-' + tab).classList.add('bg-orange-600', 'text-white');
+
+            const activeTab = document.getElementById('tab-' + tab);
+            const activeBtn = document.getElementById('btn-' + tab);
+            if(activeTab) activeTab.classList.remove('hidden');
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-orange-600', 'text-white');
+            }
 
             if(tab === 'member') loadMembers();
             if(tab === 'touring') loadTouring();
+            if(tab === 'keuangan') loadKeuangan();
         }
 
         // Modal Handler
         function openModal(type) {
             document.getElementById('modal').classList.remove('hidden');
             document.getElementById('trans-type').value = type;
-            document.getElementById('modal-title').innerText = type === 'masuk' ? 'Tambah Uang Masuk' : 'Tambah Uang Keluar';
-            document.getElementById('modal-title').className = type === 'masuk' ? 'font-bold text-base text-emerald-400' : 'font-bold text-base text-rose-400';
+            const title = document.getElementById('modal-title');
+            title.innerText = type === 'masuk' ? 'Tambah Uang Masuk' : 'Tambah Uang Keluar';
+            title.className = type === 'masuk' ? 'font-bold text-base text-emerald-400' : 'font-bold text-base text-rose-400';
         }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
-        // Load Keuangan & Saldo
+        // Keuangan
         async function loadKeuangan() {
             const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
             let total = 0;
             const list = document.getElementById('history-list');
+            if(!list) return;
             list.innerHTML = '';
 
             if(!data || data.length === 0) {
@@ -170,13 +180,14 @@
             document.getElementById('total-saldo').innerText = `Rp ${total.toLocaleString()}`;
         }
 
-        // Load & Save Member
+        // Member
         async function loadMembers() {
             const { data } = await supabase.from('members').select('*').order('nama_lengkap');
             const list = document.getElementById('member-list');
+            if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada member.</p>';
             data?.forEach(m => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center">
+                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-slate-200">
                     <span><b>${m.nama_lengkap}</b> (NRA: ${m.nra})</span>
                     <span class="text-slate-400">${m.plat_nomor || '-'}</span>
                 </div>`;
@@ -194,14 +205,15 @@
             else { alert('Member berhasil disimpan!'); document.getElementById('form-member').reset(); loadMembers(); }
         };
 
-        // Load & Save Touring
+        // Touring
         async function loadTouring() {
             const { data } = await supabase.from('touring_plans').select('*').order('tanggal_berangkat', { ascending: false });
             const list = document.getElementById('touring-list');
+            if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500">Belum ada plan touring.</p>';
             data?.forEach(t => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl space-y-1">
-                    <p class="font-bold text-slate-200">${t.nama_acara} - <span class="text-orange-400">${t.tujuan}</span></p>
+                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl space-y-1 text-slate-200">
+                    <p class="font-bold">${t.nama_acara} - <span class="text-orange-400">${t.tujuan}</span></p>
                     <p class="text-[10px] text-slate-400">Budget: Rp ${parseFloat(t.target_budget).toLocaleString()} | Berangkat: ${t.tanggal_berangkat}</p>
                 </div>`;
             });
@@ -219,7 +231,7 @@
             else { alert('Plan Touring berhasil disimpan!'); document.getElementById('form-touring').reset(); loadTouring(); }
         };
 
-        // Submit Transaksi Uang Masuk/Keluar
+        // Transaksi
         document.getElementById('form-transaksi').onsubmit = async (e) => {
             e.preventDefault();
             const { error } = await supabase.from('transactions').insert([{
@@ -232,7 +244,7 @@
             else { closeModal(); document.getElementById('form-transaksi').reset(); loadKeuangan(); }
         };
 
-        // Inisialisasi awal
+        // Load awal
         loadKeuangan();
     </script>
 </body>
