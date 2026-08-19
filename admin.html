@@ -2,97 +2,121 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Admin - M-Kas Rider</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel M-Kas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-950 text-white flex h-screen">
+<body class="bg-gray-950 text-gray-100 flex min-h-screen font-sans">
 
-    <!-- Sidebar -->
-    <div class="w-64 bg-slate-900 p-6 space-y-6">
-        <h1 class="text-xl font-bold text-orange-500">ADMIN PANEL</h1>
-        <div class="space-y-2">
-            <button onclick="show('member')" class="w-full text-left p-3 bg-slate-800 rounded">👥 Kelola Member</button>
-            <button onclick="show('touring')" class="w-full text-left p-3 bg-slate-800 rounded">🏍️ Plan Touring</button>
-            <button onclick="show('kas')" class="w-full text-left p-3 bg-slate-800 rounded">💰 Input Kas</button>
-        </div>
-        <a href="index.html" class="block text-center text-sm text-slate-400">Kembali ke Dashboard</a>
-    </div>
+    <!-- Sidebar Navigasi -->
+    <aside class="w-64 bg-gray-900 border-r border-gray-800 p-6 flex flex-col">
+        <h1 class="text-xl font-bold text-orange-500 mb-8">ADMIN PANEL</h1>
+        <nav class="space-y-3 flex-1">
+            <button onclick="showTab('member')" class="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg">👥 Kelola Member</button>
+            <button onclick="showTab('touring')" class="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg">🏍️ Plan Touring</button>
+            <button onclick="showTab('kas')" class="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg">💰 Input Kas</button>
+        </nav>
+        <a href="index.html" class="text-sm text-gray-500 hover:text-white">← Kembali ke Dashboard</a>
+    </aside>
 
-    <!-- Main -->
-    <div class="flex-1 p-10 overflow-y-auto">
+    <!-- Main Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
         
-        <!-- Form Member -->
-        <div id="sec-member" class="space-y-4">
-            <h2 class="text-2xl font-bold">Data Member</h2>
-            <input type="text" id="m-nama" placeholder="Nama Lengkap" class="w-full p-3 bg-slate-800 rounded">
-            <input type="text" id="m-nra" placeholder="NRA" class="w-full p-3 bg-slate-800 rounded">
-            <button onclick="saveMember()" class="w-full bg-blue-600 p-3 rounded">Simpan Member</button>
+        <!-- SECTION: MEMBER -->
+        <div id="tab-member" class="max-w-xl space-y-4">
+            <h2 class="text-2xl font-bold mb-6">Tambah Data Member</h2>
+            <input type="text" id="m-nama" placeholder="Nama Lengkap (Wajib)" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="text" id="m-nra" placeholder="NRA (Wajib)" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="text" id="m-plat" placeholder="Plat Nomor" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="text" id="m-motor" placeholder="Tipe Motor" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <button onclick="saveMember()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold">Simpan Member</button>
         </div>
 
-        <!-- Form Touring -->
-        <div id="sec-touring" class="space-y-4 hidden">
-            <h2 class="text-2xl font-bold">Rencana Touring</h2>
-            <input type="text" id="t-nama" placeholder="Nama Acara" class="w-full p-3 bg-slate-800 rounded">
-            <input type="text" id="t-tujuan" placeholder="Tujuan" class="w-full p-3 bg-slate-800 rounded">
-            <input type="number" id="t-budget" placeholder="Target Budget" class="w-full p-3 bg-slate-800 rounded">
-            <input type="date" id="t-tanggal" class="w-full p-3 bg-slate-800 rounded">
-            <button onclick="saveTouring()" class="w-full bg-indigo-600 p-3 rounded">Simpan Touring</button>
+        <!-- SECTION: TOURING -->
+        <div id="tab-touring" class="max-w-xl space-y-4 hidden">
+            <h2 class="text-2xl font-bold mb-6">Buat Rencana Touring</h2>
+            <input type="text" id="t-nama" placeholder="Nama Acara (Wajib)" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="text" id="t-tujuan" placeholder="Tujuan (Wajib)" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="text" id="t-tikum" placeholder="Titik Kumpul" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="number" id="t-budget" placeholder="Target Budget" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <input type="datetime-local" id="t-tgl" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <button onclick="saveTouring()" class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded font-bold">Simpan Touring</button>
         </div>
 
-        <!-- Form Kas -->
-        <div id="sec-kas" class="space-y-4 hidden">
-            <h2 class="text-2xl font-bold">Input Kas</h2>
-            <select id="k-member" class="w-full p-3 bg-slate-800 rounded text-white"></select>
-            <select id="k-touring" class="w-full p-3 bg-slate-800 rounded text-white"></select>
-            <input type="number" id="k-jumlah" placeholder="Jumlah Bayar" class="w-full p-3 bg-slate-800 rounded">
-            <select id="k-sesi" class="w-full p-3 bg-slate-800 rounded text-white">
+        <!-- SECTION: KAS -->
+        <div id="tab-kas" class="max-w-xl space-y-4 hidden">
+            <h2 class="text-2xl font-bold mb-6">Input Pembayaran Kas</h2>
+            <select id="k-member" class="w-full p-3 bg-gray-900 border border-gray-700 rounded text-white"></select>
+            <select id="k-touring" class="w-full p-3 bg-gray-900 border border-gray-700 rounded text-white"></select>
+            <input type="number" id="k-jumlah" placeholder="Jumlah Bayar (Wajib)" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <select id="k-sesi" class="w-full p-3 bg-gray-900 border border-gray-700 rounded text-white">
                 <option value="1">Sesi 1</option><option value="2">Sesi 2</option>
                 <option value="3">Sesi 3</option><option value="4">Sesi 4</option>
             </select>
-            <button onclick="saveKas()" class="w-full bg-green-600 p-3 rounded">Input Pembayaran</button>
+            <input type="text" id="k-bukti" placeholder="Link Bukti Transfer" value="N/A" class="w-full p-3 bg-gray-900 border border-gray-700 rounded">
+            <button onclick="saveKas()" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold">Simpan Kas</button>
         </div>
-    </div>
+    </main>
 
     <script>
         const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        function show(id) {
-            document.getElementById('sec-member').classList.add('hidden');
-            document.getElementById('sec-touring').classList.add('hidden');
-            document.getElementById('sec-kas').classList.add('hidden');
-            document.getElementById('sec-' + id).classList.remove('hidden');
-            if(id === 'kas') loadDropdowns();
+        // Fungsi Ganti Tab
+        function showTab(id) {
+            document.getElementById('tab-member').classList.add('hidden');
+            document.getElementById('tab-touring').classList.add('hidden');
+            document.getElementById('tab-kas').classList.add('hidden');
+            document.getElementById('tab-' + id).classList.remove('hidden');
+            if(id === 'kas') loadOptions();
         }
 
-        async function loadDropdowns() {
-            const { data: m } = await supabase.from('members').select('id, nama_lengkap');
-            const { data: t } = await supabase.from('touring_plans').select('id, nama_acara');
-            const mSel = document.getElementById('k-member');
-            const tSel = document.getElementById('k-touring');
-            mSel.innerHTML = m.map(x => `<option value="${x.id}">${x.nama_lengkap}</option>`).join('');
-            tSel.innerHTML = t.map(x => `<option value="${x.id}">${x.nama_acara}</option>`).join('');
+        // Load Data untuk Dropdown (Member & Touring)
+        async function loadOptions() {
+            const { data: members } = await supabase.from('members').select('id, nama_lengkap');
+            const { data: touring } = await supabase.from('touring_plans').select('id, nama_acara');
+            
+            const mSelect = document.getElementById('k-member');
+            const tSelect = document.getElementById('k-touring');
+            
+            mSelect.innerHTML = members?.map(m => `<option value="${m.id}">${m.nama_lengkap}</option>`).join('');
+            tSelect.innerHTML = touring?.map(t => `<option value="${t.id}">${t.nama_acara}</option>`).join('');
         }
 
+        // Save Member
         async function saveMember() {
-            await supabase.from('members').insert([{ nama_lengkap: document.getElementById('m-nama').value, nra: document.getElementById('m-nra').value }]);
-            alert('Member Tersimpan!'); location.reload();
-        }
-
-        async function saveTouring() {
-            await supabase.from('touring_plans').insert([{ nama_acara: document.getElementById('t-nama').value, tujuan: document.getElementById('t-tujuan').value, target_budget: document.getElementById('t-budget').value, tanggal_berangkat: document.getElementById('t-tanggal').value }]);
-            alert('Touring Tersimpan!'); location.reload();
-        }
-
-        async function saveKas() {
-            const { error } = await supabase.from('kas_transactions').insert([{ 
-                member_id: document.getElementById('k-member').value, 
-                touring_id: document.getElementById('k-touring').value, 
-                jumlah_bayar: document.getElementById('k-jumlah').value,
-                sesi_pembayaran: document.getElementById('k-sesi').value,
-                bukti_transfer_url: 'N/A'
+            const { error } = await supabase.from('members').insert([{
+                nama_lengkap: document.getElementById('m-nama').value,
+                nra: document.getElementById('m-nra').value,
+                plat_nomor: document.getElementById('m-plat').value,
+                tipe_motor: document.getElementById('m-motor').value
             }]);
-            error ? alert(error.message) : alert('Kas Berhasil!');
+            error ? alert(error.message) : alert('Member Berhasil!');
+        }
+
+        // Save Touring
+        async function saveTouring() {
+            const { error } = await supabase.from('touring_plans').insert([{
+                nama_acara: document.getElementById('t-nama').value,
+                tujuan: document.getElementById('t-tujuan').value,
+                titik_kumpul: document.getElementById('t-tikum').value,
+                target_budget: document.getElementById('t-budget').value,
+                tanggal_berangkat: document.getElementById('t-tgl').value
+            }]);
+            error ? alert(error.message) : alert('Touring Berhasil!');
+        }
+
+        // Save Kas
+        async function saveKas() {
+            const { error } = await supabase.from('kas_transactions').insert([{
+                member_id: document.getElementById('k-member').value,
+                touring_id: document.getElementById('k-touring').value,
+                jumlah_bayar: document.getElementById('k-jumlah').value,
+                sesi_pembayaran: parseInt(document.getElementById('k-sesi').value),
+                bukti_transfer_url: document.getElementById('k-bukti').value,
+                status_pembayaran: 'lunas'
+            }]);
+            error ? alert(error.message) : alert('Kas Berhasil Disimpan!');
         }
     </script>
 </body>
