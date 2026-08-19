@@ -27,7 +27,7 @@
 
     <main class="max-w-4xl mx-auto p-4 space-y-6">
         
-        <!-- SECTION 1: DASHBOARD TOURING (Mengambil dari Daftar Plan Touring Admin) -->
+        <!-- SECTION 1: DASHBOARD TOURING -->
         <section class="glass-card rounded-2xl p-6 relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                 NEXT TOURING
@@ -97,8 +97,8 @@
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         // KREDENSIAL SUPABASE
-        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';[cite: 1]
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';[cite: 1]
+        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
         // Inisialisasi Klien Supabase
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -221,7 +221,7 @@
             renderKasTable(filteredData);
         }
 
-        // Pasang Event Listener untuk Tombol Filter (Aman dari error is not defined)
+        // Pasang Event Listener untuk Tombol Filter
         document.getElementById('btn-filter-semua').addEventListener('click', () => filterKas('semua'));
         document.getElementById('btn-filter-belum').addEventListener('click', () => filterKas('belum'));
         document.getElementById('btn-filter-lunas').addEventListener('click', () => filterKas('lunas'));
