@@ -529,152 +529,151 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadKeuangan();
+        // Inisialisasi Event Listener secara langsung
+        loadKeuangan();
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.id.replace('btn-', '');
-                    document.querySelectorAll('.page-tab').forEach(t => t.classList.add('hidden'));
-                    document.querySelectorAll('.tab-btn').forEach(b => {
-                        b.classList.remove('bg-orange-600', 'text-white');
-                        b.classList.add('bg-slate-800', 'text-slate-400');
-                    });
-                    document.getElementById('tab-' + id)?.classList.remove('hidden');
-                    e.target.classList.add('bg-orange-600', 'text-white');
-                    e.target.classList.remove('bg-slate-800', 'text-slate-400');
-
-                    if(id === 'riwayat' || id === 'keuangan') loadKeuangan();
-                    if(id === 'member') loadMembers();
-                    if(id === 'touring') loadTouring();
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.id.replace('btn-', '');
+                document.querySelectorAll('.page-tab').forEach(t => t.classList.add('hidden'));
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('bg-orange-600', 'text-white');
+                    b.classList.add('bg-slate-800', 'text-slate-400');
                 });
+                document.getElementById('tab-' + id)?.classList.remove('hidden');
+                e.target.classList.add('bg-orange-600', 'text-white');
+                e.target.classList.remove('bg-slate-800', 'text-slate-400');
+
+                if(id === 'riwayat' || id === 'keuangan') loadKeuangan();
+                if(id === 'member') loadMembers();
+                if(id === 'touring') loadTouring();
             });
+        });
 
-            document.getElementById('btn-open-member-modal').addEventListener('click', openMemberModal);
-            document.getElementById('btn-batal-member').addEventListener('click', closeMemberModal);
+        document.getElementById('btn-open-member-modal').addEventListener('click', openMemberModal);
+        document.getElementById('btn-batal-member').addEventListener('click', closeMemberModal);
 
-            document.getElementById('btn-open-touring-modal').addEventListener('click', openTouringModal);
-            document.getElementById('btn-batal-touring').addEventListener('click', closeTouringModal);
+        document.getElementById('btn-open-touring-modal').addEventListener('click', openTouringModal);
+        document.getElementById('btn-batal-touring').addEventListener('click', closeTouringModal);
 
-            document.getElementById('btn-modal-masuk').addEventListener('click', () => openModal('masuk'));
-            document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
-            document.getElementById('btn-batal').addEventListener('click', closeModal);
+        document.getElementById('btn-modal-masuk').addEventListener('click', () => openModal('masuk'));
+        document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
+        document.getElementById('btn-batal').addEventListener('click', closeModal);
 
-            document.getElementById('form-member').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('m-edit-id').value;
-                const nama = document.getElementById('m-nama').value;
-                const nra = document.getElementById('m-nra').value;
-                const plat = document.getElementById('m-plat').value;
+        document.getElementById('form-member').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('m-edit-id').value;
+            const nama = document.getElementById('m-nama').value;
+            const nra = document.getElementById('m-nra').value;
+            const plat = document.getElementById('m-plat').value;
 
-                let error;
-                if (editId) {
-                    const res = await db.from('members').update({
-                        nama_lengkap: nama,
-                        nra: nra,
-                        plat_nomor: plat
-                    }).eq('id', editId);
-                    error = res.error;
-                } else {
-                    const res = await db.from('members').insert([{
-                        nama_lengkap: nama,
-                        nra: nra,
-                        plat_nomor: plat
-                    }]);
-                    error = res.error;
-                }
+            let error;
+            if (editId) {
+                const res = await db.from('members').update({
+                    nama_lengkap: nama,
+                    nra: nra,
+                    plat_nomor: plat
+                }).eq('id', editId);
+                error = res.error;
+            } else {
+                const res = await db.from('members').insert([{
+                    nama_lengkap: nama,
+                    nra: nra,
+                    plat_nomor: plat
+                }]);
+                error = res.error;
+            }
 
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else { 
-                    showNotification(editId ? 'Member berhasil diperbarui!' : 'Member berhasil disimpan!', 'success'); 
-                    document.getElementById('form-member').reset(); 
-                    document.getElementById('m-edit-id').value = '';
-                    closeMemberModal(); 
-                    loadMembers(); 
-                }
-            });
+            if(error) {
+                showNotification(error.message, 'error');
+            } else { 
+                showNotification(editId ? 'Member berhasil diperbarui!' : 'Member berhasil disimpan!', 'success'); 
+                document.getElementById('form-member').reset(); 
+                document.getElementById('m-edit-id').value = '';
+                closeMemberModal(); 
+                loadMembers(); 
+            }
+        });
 
-            document.getElementById('form-touring').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('t-edit-id').value;
-                const touringData = {
-                    nama_acara: document.getElementById('t-nama').value,
-                    tujuan: document.getElementById('t-tujuan').value,
-                    target_budget: document.getElementById('t-budget').value,
-                    estimasi_peserta: document.getElementById('t-peserta').value,
-                    jumlah_hari: document.getElementById('t-hari').value,
-                    tanggal_berangkat: document.getElementById('t-tgl-berangkat').value,
-                    tanggal_pulang: document.getElementById('t-tgl-pulang').value
-                };
+        document.getElementById('form-touring').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('t-edit-id').value;
+            const touringData = {
+                nama_acara: document.getElementById('t-nama').value,
+                tujuan: document.getElementById('t-tujuan').value,
+                target_budget: parseFloat(document.getElementById('t-budget').value),
+                estimasi_peserta: parseInt(document.getElementById('t-peserta').value),
+                jumlah_hari: parseInt(document.getElementById('t-hari').value),
+                tanggal_berangkat: document.getElementById('t-tgl-berangkat').value,
+                tanggal_pulang: document.getElementById('t-tgl-pulang').value
+            };
 
-                let error;
-                if (editId) {
-                    const res = await db.from('touring_plans').update(touringData).eq('id', editId);
-                    error = res.error;
-                } else {
-                    const res = await db.from('touring_plans').insert([touringData]);
-                    error = res.error;
-                }
+            let error;
+            if (editId) {
+                const res = await db.from('touring_plans').update(touringData).eq('id', editId);
+                error = res.error;
+            } else {
+                const res = await db.from('touring_plans').insert([touringData]);
+                error = res.error;
+            }
 
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else { 
-                    showNotification(editId ? 'Plan Touring berhasil diperbarui!' : 'Plan Touring berhasil disimpan!', 'success'); 
-                    document.getElementById('form-touring').reset(); 
-                    document.getElementById('t-edit-id').value = '';
-                    closeTouringModal();
-                    loadTouring(); 
-                }
-            });
+            if(error) {
+                showNotification(error.message, 'error');
+            } else { 
+                showNotification(editId ? 'Plan Touring berhasil diperbarui!' : 'Plan Touring berhasil disimpan!', 'success'); 
+                document.getElementById('form-touring').reset(); 
+                document.getElementById('t-edit-id').value = '';
+                closeTouringModal();
+                loadTouring(); 
+            }
+        });
 
-            document.getElementById('form-transaksi').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const editId = document.getElementById('trans-edit-id').value;
-                const type = document.getElementById('trans-type').value;
-                let category, description;
+        document.getElementById('form-transaksi').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('trans-edit-id').value;
+            const type = document.getElementById('trans-type').value;
+            let category, description;
 
-                if (type === 'masuk') {
-                    const monthVal = document.getElementById('trans-month').value;
-                    const sesi = document.getElementById('trans-cat-select').value;
-                    const memberDesc = document.getElementById('trans-desc-select').value;
+            if (type === 'masuk') {
+                const monthVal = document.getElementById('trans-month').value;
+                const sesi = document.getElementById('trans-cat-select').value;
+                const memberDesc = document.getElementById('trans-desc-select').value;
 
-                    category = sesi;
-                    description = `Bulan: ${monthVal} | ${memberDesc}`;
-                } else {
-                    category = document.getElementById('trans-cat-input').value;
-                    description = document.getElementById('trans-desc-input').value;
-                }
+                category = sesi;
+                description = `Bulan: ${monthVal} | ${memberDesc}`;
+            } else {
+                category = document.getElementById('trans-cat-input').value;
+                description = document.getElementById('trans-desc-input').value;
+            }
 
-                let error;
-                if (editId) {
-                    const res = await db.from('transactions').update({
-                        type: type,
-                        amount: document.getElementById('trans-amount').value,
-                        category: category,
-                        description: description
-                    }).eq('id', editId);
-                    error = res.error;
-                } else {
-                    const res = await db.from('transactions').insert([{
-                        type: type,
-                        amount: document.getElementById('trans-amount').value,
-                        category: category,
-                        description: description
-                    }]);
-                    error = res.error;
-                }
+            let error;
+            if (editId) {
+                const res = await db.from('transactions').update({
+                    type: type,
+                    amount: parseFloat(document.getElementById('trans-amount').value),
+                    category: category,
+                    description: description
+                }).eq('id', editId);
+                error = res.error;
+            } else {
+                const res = await db.from('transactions').insert([{
+                    type: type,
+                    amount: parseFloat(document.getElementById('trans-amount').value),
+                    category: category,
+                    description: description
+                }]);
+                error = res.error;
+            }
 
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else { 
-                    closeModal(); 
-                    document.getElementById('form-transaksi').reset(); 
-                    document.getElementById('trans-edit-id').value = '';
-                    showNotification(editId ? 'Transaksi berhasil diperbarui!' : 'Transaksi berhasil disimpan!', 'success');
-                    loadKeuangan(); 
-                }
-            });
+            if(error) {
+                showNotification(error.message, 'error');
+            } else { 
+                closeModal(); 
+                document.getElementById('form-transaksi').reset(); 
+                document.getElementById('trans-edit-id').value = '';
+                showNotification(editId ? 'Transaksi berhasil diperbarui!' : 'Transaksi berhasil disimpan!', 'success');
+                loadKeuangan(); 
+            }
         });
     })();
     </script>
