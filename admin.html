@@ -64,7 +64,7 @@
                 <span>+ Tambah Member</span>
             </button>
             
-            <!-- Daftar Member Terdaftar (Utama & Luas ke Atas) -->
+            <!-- Daftar Member Terdaftar -->
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
                 <div id="member-list" class="space-y-2 text-xs text-slate-400">Memuat data member...</div>
@@ -146,11 +146,12 @@
         </div>
     </div>
 
-    <!-- MODAL TAMBAH MEMBER -->
+    <!-- MODAL TAMBAH / EDIT MEMBER -->
     <div id="modal-member" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 w-full max-w-sm p-6 rounded-3xl border border-slate-800 space-y-4">
-            <h3 class="font-bold text-base text-blue-400">Tambah Anggota Baru</h3>
+            <h3 id="modal-member-title" class="font-bold text-base text-blue-400">Tambah Anggota Baru</h3>
             <form id="form-member" class="space-y-3">
+                <input type="hidden" id="m-edit-id">
                 <div>
                     <label class="text-xs text-slate-400">Nama Lengkap</label>
                     <input type="text" id="m-nama" placeholder="Masukkan nama lengkap" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm mt-1" required>
@@ -235,10 +236,18 @@
             if(!list) return;
             list.innerHTML = data?.length ? '' : '<p class="text-slate-500 text-xs">Belum ada member.</p>';
             data?.forEach(m => {
-                list.innerHTML += `<div class="bg-slate-800 p-2.5 rounded-xl flex justify-between items-center text-slate-200 text-xs">
-                    <span><b>${m.nama_lengkap}</b> (NRA: ${m.nra})</span>
-                    <span class="text-slate-400">${m.plat_nomor || '-'}</span>
-                </div>`;
+                const platVal = m.plat_nomor ? m.plat_nomor : '';
+                list.innerHTML += `
+                    <div class="bg-slate-800/60 p-3 rounded-xl flex justify-between items-center text-slate-200 text-xs border border-slate-700/50">
+                        <div class="space-y-0.5">
+                            <p class="font-bold text-sm text-white">${m.nama_lengkap}</p>
+                            <p class="text-[11px] text-slate-400">NRA: ${m.nra} | Plat: ${m.plat_nomor || '-'}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="window.editMember('${m.id}', '${m.nama_lengkap.replace(/'/g, "\\'")}', '${m.nra}', '${platVal}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
+                            <button onclick="window.deleteMember('${m.id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Hapus</button>
+                        </div>
+                    </div>`;
             });
         }
 
@@ -307,12 +316,36 @@
         }
 
         function openMemberModal() {
+            document.getElementById('modal-member-title').innerText = 'Tambah Anggota Baru';
+            document.getElementById('m-edit-id').value = '';
+            document.getElementById('form-member').reset();
             document.getElementById('modal-member').classList.remove('hidden');
         }
 
         function closeMemberModal() {
             document.getElementById('modal-member').classList.add('hidden');
         }
+
+        // Global functions untuk interaksi tombol Edit & Hapus member
+        window.editMember = function(id, nama, nra, plat) {
+            document.getElementById('modal-member-title').innerText = 'Edit Anggota';
+            document.getElementById('m-edit-id').value = id;
+            document.getElementById('m-nama').value = nama;
+            document.getElementById('m-nra').value = nra;
+            document.getElementById('m-plat').value = (plat && plat !== 'null') ? plat : '';
+            document.getElementById('modal-member').classList.remove('hidden');
+        };
+
+        window.deleteMember = async function(id) {
+            if(confirm('Apakah Anda yakin ingin menghapus member ini?')) {
+                const { error } = await db.from('members').delete().eq('id', id);
+                if(error) alert(error.message);
+                else {
+                    alert('Member berhasil dihapus!');
+                    loadMembers();
+                }
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             loadKeuangan();
@@ -345,18 +378,36 @@
             document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
             document.getElementById('btn-batal').addEventListener('click', closeModal);
 
-            // Form Submit Listeners
+            // Form Submit Member (Bisa untuk Insert atau Update)
             document.getElementById('form-member').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const { error } = await db.from('members').insert([{
-                    nama_lengkap: document.getElementById('m-nama').value,
-                    nra: document.getElementById('m-nra').value,
-                    plat_nomor: document.getElementById('m-plat').value
-                }]);
+                const editId = document.getElementById('m-edit-id').value;
+                const nama = document.getElementById('m-nama').value;
+                const nra = document.getElementById('m-nra').value;
+                const plat = document.getElementById('m-plat').value;
+
+                let error;
+                if (editId) {
+                    const res = await db.from('members').update({
+                        nama_lengkap: nama,
+                        nra: nra,
+                        plat_nomor: plat
+                    }).eq('id', editId);
+                    error = res.error;
+                } else {
+                    const res = await db.from('members').insert([{
+                        nama_lengkap: nama,
+                        nra: nra,
+                        plat_nomor: plat
+                    }]);
+                    error = res.error;
+                }
+
                 if(error) alert(error.message);
                 else { 
-                    alert('Member berhasil disimpan!'); 
+                    alert(editId ? 'Member berhasil diperbarui!' : 'Member berhasil disimpan!'); 
                     document.getElementById('form-member').reset(); 
+                    document.getElementById('m-edit-id').value = '';
                     closeMemberModal(); 
                     loadMembers(); 
                 }
