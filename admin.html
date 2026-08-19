@@ -47,20 +47,18 @@
 
         <!-- TAB 2: RIWAYAT -->
         <div id="tab-riwayat" class="page-tab space-y-6 hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Riwayat Pemasukan -->
-                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                    <h3 class="font-bold text-emerald-400 mb-4 text-sm">Pemasukan</h3>
-                    <div id="list-masuk" class="space-y-3">
-                        <p class="text-xs text-slate-500">Memuat data...</p>
-                    </div>
+            <!-- Riwayat Pemasukan -->
+            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
+                <h3 class="font-bold text-emerald-400 mb-3 text-sm">Riwayat Pemasukan (15 Terakhir)</h3>
+                <div id="list-masuk" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
+                    <p class="text-xs text-slate-500">Memuat data...</p>
                 </div>
-                <!-- Riwayat Pengeluaran -->
-                <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                    <h3 class="font-bold text-rose-400 mb-4 text-sm">Pengeluaran</h3>
-                    <div id="list-keluar" class="space-y-3">
-                        <p class="text-xs text-slate-500">Memuat data...</p>
-                    </div>
+            </div>
+            <!-- Riwayat Pengeluaran -->
+            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
+                <h3 class="font-bold text-rose-400 mb-3 text-sm">Riwayat Pengeluaran (15 Terakhir)</h3>
+                <div id="list-keluar" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
+                    <p class="text-xs text-slate-500">Memuat data...</p>
                 </div>
             </div>
         </div>
@@ -72,7 +70,7 @@
                 <span>+ Tambah Member</span>
             </button>
             
-            <!-- Daftar Member Terdaftar (Dibatasi 6 item terlihat + Scroll) -->
+            <!-- Daftar Member Terdaftar -->
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
                 <div id="member-list" class="space-y-2 text-xs text-slate-400 max-h-[380px] overflow-y-auto pr-1">Memuat data member...</div>
@@ -186,7 +184,6 @@
     (function() {
         const db = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        // Fungsi Toast Notification Kustom
         function showNotification(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toast-msg');
@@ -212,7 +209,8 @@
         }
 
         async function loadKeuangan() {
-            const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false });
+            // Ambil maksimal 15 transaksi terakhir
+            const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false }).limit(15);
             let total = 0;
             const listMasuk = document.getElementById('list-masuk');
             const listKeluar = document.getElementById('list-keluar');
@@ -240,13 +238,13 @@
                     hasMasuk = true;
                     total += amt;
                     listMasuk.innerHTML += `
-                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 flex justify-between items-center text-xs space-x-2">
-                            <div class="space-y-1 overflow-hidden">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-slate-200">${catText}</span>
-                                    <span class="font-bold text-emerald-400">+ Rp ${amt.toLocaleString()}</span>
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50 flex justify-between items-center text-xs gap-3">
+                            <div class="space-y-0.5 overflow-hidden flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200 truncate">${catText}</span>
+                                    <span class="font-bold text-emerald-400 shrink-0">+ Rp ${amt.toLocaleString()}</span>
                                 </div>
-                                <p class="text-[10px] text-slate-400 truncate">${descText}</p>
+                                <p class="text-[11px] text-slate-400 truncate">${descText}</p>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <button onclick="window.editTransaction('${t.id}', '${t.type}', '${t.amount}', '${catText.replace(/'/g, "\\'")}', '${descText.replace(/'/g, "\\'")}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
@@ -257,13 +255,13 @@
                     hasKeluar = true;
                     total -= amt;
                     listKeluar.innerHTML += `
-                        <div class="bg-slate-800/50 p-3 rounded-2xl border border-slate-800 flex justify-between items-center text-xs space-x-2">
-                            <div class="space-y-1 overflow-hidden">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-slate-200">${catText}</span>
-                                    <span class="font-bold text-rose-400">- Rp ${amt.toLocaleString()}</span>
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50 flex justify-between items-center text-xs gap-3">
+                            <div class="space-y-0.5 overflow-hidden flex-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200 truncate">${catText}</span>
+                                    <span class="font-bold text-rose-400 shrink-0">- Rp ${amt.toLocaleString()}</span>
                                 </div>
-                                <p class="text-[10px] text-slate-400 truncate">${descText}</p>
+                                <p class="text-[11px] text-slate-400 truncate">${descText}</p>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <button onclick="window.editTransaction('${t.id}', '${t.type}', '${t.amount}', '${catText.replace(/'/g, "\\'")}', '${descText.replace(/'/g, "\\'")}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition">Edit</button>
