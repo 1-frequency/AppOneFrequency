@@ -59,16 +59,26 @@
 
         <!-- TAB 3: MEMBER -->
         <div id="tab-member" class="page-tab space-y-6 hidden">
-            <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
-                <h3 class="font-bold text-sm mb-4 text-orange-400">Tambah Anggota Baru</h3>
+            <!-- Tombol Trigger Form Tambah Member -->
+            <button id="btn-toggle-member-form" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-2xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
+                <span>+ Tambah Member</span>
+            </button>
+
+            <!-- Form Tambah Anggota Baru (Hidden by default) -->
+            <div id="container-form-member" class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-orange-400">Tambah Anggota Baru</h3>
+                    <button id="btn-close-member-form" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 bg-slate-800 rounded-lg">Tutup</button>
+                </div>
                 <form id="form-member" class="space-y-3">
                     <input type="text" id="m-nama" placeholder="Nama Lengkap" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
                     <input type="text" id="m-nra" placeholder="NRA (Nomor Anggota)" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm" required>
                     <input type="text" id="m-plat" placeholder="Plat Nomor Kendaraan" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Member</button>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded-xl font-bold text-sm shadow-lg">Simpan Member</button>
                 </form>
             </div>
             
+            <!-- Daftar Member Terdaftar (Utama & Luas ke Atas) -->
             <div class="bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-lg">
                 <h3 class="font-bold text-sm mb-3 text-slate-300">Daftar Member Terdaftar</h3>
                 <div id="member-list" class="space-y-2 text-xs text-slate-400">Memuat data member...</div>
@@ -307,6 +317,15 @@
                 });
             });
 
+            // Toggle Member Form Listeners
+            const formMemberContainer = document.getElementById('container-form-member');
+            document.getElementById('btn-toggle-member-form').addEventListener('click', () => {
+                formMemberContainer.classList.toggle('hidden');
+            });
+            document.getElementById('btn-close-member-form').addEventListener('click', () => {
+                formMemberContainer.classList.add('hidden');
+            });
+
             // Modal Listeners
             document.getElementById('btn-modal-masuk').addEventListener('click', () => openModal('masuk'));
             document.getElementById('btn-modal-keluar').addEventListener('click', () => openModal('keluar'));
@@ -321,7 +340,12 @@
                     plat_nomor: document.getElementById('m-plat').value
                 }]);
                 if(error) alert(error.message);
-                else { alert('Member berhasil disimpan!'); document.getElementById('form-member').reset(); loadMembers(); }
+                else { 
+                    alert('Member berhasil disimpan!'); 
+                    document.getElementById('form-member').reset(); 
+                    formMemberContainer.classList.add('hidden'); // Tutup form setelah simpan
+                    loadMembers(); 
+                }
             });
 
             document.getElementById('form-touring').addEventListener('submit', async (e) => {
