@@ -2,208 +2,81 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - M-Kas Rider</title>
-    <!-- Tailwind CSS -->
+    <title>Admin Panel M-Kas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
 </head>
-<body class="bg-gray-900 text-gray-100 pb-12">
-
-    <!-- Header -->
-    <header class="p-5 bg-gray-800 shadow-md flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-bold text-orange-500">ADMIN PANEL</h1>
-            <p class="text-xs text-gray-400">Input Data Keuangan & Touring Komunitas</p>
-        </div>
-        <a href="index.html" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg border border-gray-600">Lihat Dashboard Utama</a>
-    </header>
-
-    <main class="max-w-3xl mx-auto p-4 space-y-8 mt-4">
+<body class="bg-gray-900 text-gray-100 p-5">
+    <main class="max-w-2xl mx-auto space-y-8">
         
-        <!-- FORM 1: TAMBAH MEMBER -->
-        <section class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold mb-4 text-orange-400 flex items-center">
-                <span class="bg-orange-500 w-2 h-5 mr-2 rounded"></span> 1. Tambah Member Baru
-            </h2>
-            <form id="form-member" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Nama Lengkap</label>
-                    <input type="text" id="m-nama" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="Contoh: Bro Andi">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">NRA (Nomor Registrasi Anggota)</label>
-                        <input type="text" id="m-nra" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="Contoh: 001">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Tipe Motor</label>
-                        <input type="text" id="m-motor" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="Contoh: Honda ADV 160">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg text-sm transition">Simpan Member</button>
+        <!-- Form Member -->
+        <div class="bg-gray-800 p-6 rounded-xl">
+            <h2 class="text-xl font-bold mb-4">Tambah Member</h2>
+            <form id="form-member" class="space-y-3">
+                <input type="text" id="m-nama" placeholder="Nama Lengkap" class="w-full p-2 bg-gray-700 rounded" required>
+                <input type="text" id="m-nra" placeholder="NRA" class="w-full p-2 bg-gray-700 rounded" required>
+                <input type="text" id="m-plat" placeholder="Plat Nomor" class="w-full p-2 bg-gray-700 rounded">
+                <button type="submit" class="w-full bg-blue-600 p-2 rounded font-bold">Simpan Member</button>
             </form>
-        </section>
+        </div>
 
-        <!-- FORM 2: TAMBAH RENCANA TOURING -->
-        <section class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold mb-4 text-orange-400 flex items-center">
-                <span class="bg-orange-500 w-2 h-5 mr-2 rounded"></span> 2. Buat Rencana Touring
-            </h2>
-            <form id="form-touring" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Nama Acara</label>
-                    <input type="text" id="t-nama" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="Contoh: Touring Wajib ke Pangandaran">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Tujuan</label>
-                        <input type="text" id="t-tujuan" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="Pangandaran">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Target Budget Kas (Rp)</label>
-                        <input type="number" id="t-budget" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="5000000">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Tanggal Berangkat</label>
-                    <input type="date" id="t-tanggal" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500">
-                </div>
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg text-sm transition">Simpan Rencana Touring</button>
+        <!-- Form Transaksi Kas -->
+        <div class="bg-gray-800 p-6 rounded-xl">
+            <h2 class="text-xl font-bold mb-4">Input Kas (4 Sesi)</h2>
+            <form id="form-kas" class="space-y-3">
+                <select id="k-member" class="w-full p-2 bg-gray-700 rounded text-black" required></select>
+                <select id="k-touring" class="w-full p-2 bg-gray-700 rounded text-black" required>
+                    <option value="">-- Pilih Rencana Touring --</option>
+                </select>
+                <input type="number" id="k-jumlah" placeholder="Jumlah Bayar (Rp)" class="w-full p-2 bg-gray-700 rounded" required>
+                <select id="k-sesi" class="w-full p-2 bg-gray-700 rounded text-black">
+                    <option value="1">Sesi 1</option>
+                    <option value="2">Sesi 2</option>
+                    <option value="3">Sesi 3</option>
+                    <option value="4">Sesi 4</option>
+                </select>
+                <input type="text" id="k-bukti" value="manual" class="w-full p-2 bg-gray-700 rounded" placeholder="URL Bukti Transfer">
+                <button type="submit" class="w-full bg-green-600 p-2 rounded font-bold">Input Pembayaran</button>
             </form>
-        </section>
-
-        <!-- FORM 3: INPUT PEMBAYARAN KAS (4 SESI) -->
-        <section class="glass-card rounded-2xl p-6">
-            <h2 class="text-lg font-bold mb-4 text-orange-400 flex items-center">
-                <span class="bg-orange-500 w-2 h-5 mr-2 rounded"></span> 3. Input Pembayaran Kas (4 Sesi)
-            </h2>
-            <form id="form-kas" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Pilih Member</label>
-                    <select id="k-member" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500">
-                        <option value="">-- Pilih Member --</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Pilih Sesi Pembayaran</label>
-                        <select id="k-sesi" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500">
-                            <option value="1">Sesi 1</option>
-                            <option value="2">Sesi 2</option>
-                            <option value="3">Sesi 3</option>
-                            <option value="4">Sesi 4</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Jumlah Bayar (Rp)</label>
-                        <input type="number" id="k-jumlah" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="50000">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Link Bukti Transfer (URL Gambar/Foto)</label>
-                    <input type="text" id="k-bukti" required class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-orange-500" placeholder="https://i.ibb.co/... atau URL Supabase Storage">
-                </div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg text-sm transition">Verifikasi & Masukkan Kas Lunas</button>
-            </form>
-        </section>
-
+        </div>
     </main>
 
-    <!-- SCRIPT LOGIKA KONEKSI & INSERT SUPABASE -->
     <script>
-        const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const supabase = window.supabase.createClient('https://phpjaseuurpguhtzdvwy.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4');
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // 1. Ambil data member untuk pilihan Dropdown di Form Kas
-        async function loadDropdownMembers() {
-            const { data, error } = await supabase.from('members').select('id, nama_lengkap, nra').order('nama_lengkap');
-            const select = document.getElementById('k-member');
-            if(data) {
-                data.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.textContent = `${m.nama_lengkap} (NRA: ${m.nra || '-'})`;
-                    select.appendChild(opt);
-                });
-            }
+        // Load Data Dropdown
+        async function loadData() {
+            const { data: members } = await supabase.from('members').select('id, nama_lengkap');
+            const { data: touring } = await supabase.from('touring_plans').select('id, nama_acara');
+            
+            const mSelect = document.getElementById('k-member');
+            members?.forEach(m => mSelect.innerHTML += `<option value="${m.id}">${m.nama_lengkap}</option>`);
+            
+            const tSelect = document.getElementById('k-touring');
+            touring?.forEach(t => tSelect.innerHTML += `<option value="${t.id}">${t.nama_acara}</option>`);
         }
 
-        // 2. Aksi Submit Form Member
-        document.getElementById('form-member').addEventListener('submit', async (e) => {
+        // Submit Member
+        document.getElementById('form-member').onsubmit = async (e) => {
             e.preventDefault();
-            const nama = document.getElementById('m-nama').value;
-            const nra = document.getElementById('m-nra').value;
-            const motor = document.getElementById('m-motor').value;
+            await supabase.from('members').insert([{ nama_lengkap: document.getElementById('m-nama').value, nra: document.getElementById('m-nra').value, plat_nomor: document.getElementById('m-plat').value }]);
+            alert('Sukses'); location.reload();
+        };
 
-            const { error } = await supabase.from('members').insert([{ nama_lengkap: nama, nra: nra, tipe_motor: motor }]);
-            if(error) {
-                alert('Gagal menyimpan member: ' + error.message);
-            } else {
-                alert('Member berhasil ditambahkan!');
-                location.reload();
-            }
-        });
-
-        // 3. Aksi Submit Form Touring
-        document.getElementById('form-touring').addEventListener('submit', async (e) => {
+        // Submit Kas
+        document.getElementById('form-kas').onsubmit = async (e) => {
             e.preventDefault();
-            const nama_acara = document.getElementById('t-nama').value;
-            const tujuan = document.getElementById('t-tujuan').value;
-            const target_budget = document.getElementById('t-budget').value;
-            const tanggal_berangkat = document.getElementById('t-tanggal').value;
-
-            const { error } = await supabase.from('touring_plans').insert([{ 
-                nama_acara, tujuan, target_budget, tanggal_berangkat, status_acara: 'rencana' 
-            }]);
-            
-            if(error) {
-                alert('Gagal menyimpan touring: ' + error.message);
-            } else {
-                alert('Rencana touring berhasil dibuat!');
-                document.getElementById('form-touring').reset();
-            }
-        });
-
-        // 4. Aksi Submit Form Kas 4 Sesi
-        document.getElementById('form-kas').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const member_id = document.getElementById('k-member').value;
-            const sesi_pembayaran = parseInt(document.getElementById('k-sesi').value);
-            const jumlah_bayar = document.getElementById('k-jumlah').value;
-            const bukti_transfer_url = document.getElementById('k-bukti').value;
-
             const { error } = await supabase.from('kas_transactions').insert([{
-                member_id,
-                sesi_pembayaran,
-                jumlah_bayar,
-                bukti_transfer_url,
-                status_pembayaran: 'lunas' // Langsung diset lunas oleh admin/bendahara
+                member_id: document.getElementById('k-member').value,
+                touring_id: document.getElementById('k-touring').value,
+                jumlah_bayar: document.getElementById('k-jumlah').value,
+                sesi_pembayaran: document.getElementById('k-sesi').value,
+                bukti_transfer_url: document.getElementById('k-bukti').value
             }]);
+            error ? alert(error.message) : alert('Kas berhasil disimpan!');
+        };
 
-            if(error) {
-                alert('Gagal menginput kas: ' + error.message);
-            } else {
-                alert('Pembayaran Kas Sesi berhasil dicatat dan masuk ke sistem rekap!');
-                document.getElementById('form-kas').reset();
-            }
-        });
-
-        // Jalankan saat halaman dimuat
-        document.addEventListener("DOMContentLoaded", () => {
-            loadDropdownMembers();
-        });
+        loadData();
     </script>
 </body>
 </html>
