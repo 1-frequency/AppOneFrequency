@@ -61,7 +61,7 @@
                     </p>
                 </div>
                 
-                <!-- Info Bendahara di Sebelah Kanan Teks Cilacap -->
+                <!-- Info Bendahara -->
                 <div class="bg-gray-800/80 border border-gray-700/60 px-4 py-2.5 rounded-xl text-xs shadow-inner shrink-0">
                     <span class="text-orange-400 font-semibold block">Bendahara, H. Roby Johan</span>
                     <span class="text-gray-200 font-mono text-sm tracking-wide">Bank BNI 1949890702</span>
@@ -232,7 +232,7 @@
             </div>
         </section>
 
-	<!-- SECTION 4: RIWAYAT TRANSAKSI -->
+        <!-- SECTION 4: RIWAYAT TRANSAKSI -->
         <section class="space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex items-center space-x-3">
@@ -339,6 +339,7 @@
         let reasonMap = {}; 
         let currentStatusFilter = 'semua';
         let currentParticipantFilter = 'semua';
+        let currentTransactionFilter = 'semua';
 
         // Logika Toggle Rekap Kas
         const btnToggleRekap = document.getElementById('btn-toggle-rekap');
@@ -369,7 +370,7 @@
             }
         });
 
-		// Logika Toggle Riwayat Transaksi
+        // Logika Toggle Riwayat Transaksi
         const btnToggleRiwayat = document.getElementById('btn-toggle-riwayat');
         const contentRiwayat = document.getElementById('content-riwayat-transaksi');
         const textToggleRiwayat = document.getElementById('text-toggle-riwayat');
@@ -424,19 +425,107 @@
             };
         }
 
-        function updateSaldoSaatIni() {
+        function updateSaldoDanRingkasanTransaksi() {
             let totalSaldo = 0;
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+
             globalTransactions.forEach(tx => {
                 const amount = parseFloat(tx.amount || 0);
                 const type = String(tx.type || '').toLowerCase();
-                if (type === 'keluar' || type === 'expense' || type === 'pengeluaran') {
+                const isKeluar = (type === 'keluar' || type === 'expense' || type === 'pengeluaran');
+
+                if (isKeluar) {
                     totalSaldo -= amount;
+                    totalKeluar += amount;
                 } else {
                     totalSaldo += amount;
+                    totalMasuk += amount;
                 }
             });
+
             document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
+            document.getElementById('total-pemasukan').innerText = formatRupiah(totalMasuk);
+            document.getElementById('total-pengeluaran').innerText = formatRupiah(totalKeluar);
         }
+
+        function renderRiwayatTransaksi() {
+            const tableBody = document.getElementById('riwayat-table-body');
+            tableBody.innerHTML = '';
+
+            if (!globalTransactions || globalTransactions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Tidak ada riwayat transaksi.</td></tr>';
+                return;
+            }
+
+            let filteredTx = globalTransactions.filter(tx => {
+                const type = String(tx.type || '').toLowerCase();
+                const isKeluar = (type === 'keluar' || type === 'expense' || type === 'pengeluaran');
+                if (currentTransactionFilter === 'masuk' && isKeluar) return false;
+                if (currentTransactionFilter === 'keluar' && !isKeluar) return false;
+                return true;
+            });
+
+            // Urutkan berdasarkan tanggal terbaru
+            filteredTx.sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
+
+            if (filteredTx.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Tidak ada transaksi yang sesuai dengan filter.</td></tr>';
+                return;
+            }
+
+            filteredTx.forEach(tx => {
+                const type = String(tx.type || '').toLowerCase();
+                const isKeluar = (type === 'keluar' || type === 'expense' || type === 'pengeluaran');
+                
+                let tanggalStr = '-';
+                const rawDate = tx.created_at || tx.date;
+                if (rawDate) {
+                    const d = new Date(rawDate);
+                    if (!isNaN(d)) {
+                        tanggalStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                    }
+                }
+
+                const jenisBadge = isKeluar
+                    ? `<span class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-bold">Pengeluaran</span>`
+                    : `<span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold">Pemasukan</span>`;
+
+                const nominalClass = isKeluar ? 'text-rose-400' : 'text-emerald-400';
+                const prefixNominal = isKeluar ? '- ' : '+ ';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="p-4 text-gray-300">${tanggalStr}</td>
+                    <td class="p-4 font-medium text-gray-100">${tx.description || '-'}</td>
+                    <td class="p-4 text-gray-400">${tx.category || '-'}</td>
+                    <td class="p-4 text-center">${jenisBadge}</td>
+                    <td class="p-4 text-right font-mono font-bold ${nominalClass}">${prefixNominal}${formatRupiah(tx.amount)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Filter Tombol Riwayat Transaksi
+        const btnTrxSemua = document.getElementById('btn-trx-semua');
+        const btnTrxMasuk = document.getElementById('btn-trx-masuk');
+        const btnTrxKeluar = document.getElementById('btn-trx-keluar');
+
+        function setTransactionFilter(type) {
+            currentTransactionFilter = type;
+            [btnTrxSemua, btnTrxMasuk, btnTrxKeluar].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200";
+            });
+            if (type === 'masuk') btnTrxMasuk.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else if (type === 'keluar') btnTrxKeluar.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else btnTrxSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            renderRiwayatTransaksi();
+        }
+
+        btnTrxSemua.addEventListener('click', () => setTransactionFilter('semua'));
+        btnTrxMasuk.addEventListener('click', () => setTransactionFilter('masuk'));
+        btnTrxKeluar.addEventListener('click', () => setTransactionFilter('keluar'));
 
         function updateParticipantCount() {
             let count = 0;
@@ -848,7 +937,7 @@
                 if (txError) throw txError;
 
                 globalTransactions = transactions || [];
-                updateSaldoSaatIni();
+                updateSaldoDanRingkasanTransaksi();
 
                 let memberMap = {};
                 if (membersData && membersData.length > 0) {
