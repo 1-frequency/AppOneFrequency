@@ -183,7 +183,7 @@
             </div>
         </section>
 
-        <!-- SECTION 3: DAFTAR PESERTA TOURING (DIPERBARUI MENJADI TABEL TOGGLE) -->
+        <!-- SECTION 3: DAFTAR PESERTA TOURING -->
         <section class="space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex items-center space-x-3">
@@ -234,7 +234,7 @@
             <div class="flex justify-between items-center border-b border-gray-800 pb-3">
                 <div>
                     <h3 class="text-lg font-bold text-white">Checklist Kehadiran Peserta</h3>
-                    <p class="text-xs text-gray-400">Default otomatis ikut. Jika tidak, isi alasan pada kolom yang tersedia.</p>
+                    <p class="text-xs text-gray-400">Default otomatis ikut. Jika memilih tidak, wajib mengisi alasan.</p>
                 </div>
                 <button id="btn-close-modal" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
             </div>
@@ -632,7 +632,10 @@
             globalMembers.forEach(m => {
                 const nra = m.nra || '-';
                 const nama = m.nama_lengkap || m.name || 'Member';
-                const currentStatus = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut'; 
+                // Default ke 'ikut' jika belum ada data status tersimpan
+                const currentStatus = (participantMap[nra] !== undefined && participantMap[nra] !== null && participantMap[nra] !== '') 
+                    ? participantMap[nra] 
+                    : 'ikut'; 
                 const currentAlasan = reasonMap[nra] || '';
 
                 const div = document.createElement('div');
@@ -655,7 +658,7 @@
                         </div>
                     </div>
                     <div id="wrapper_alasan_${nra}" class="${currentStatus === 'tidak' ? '' : 'hidden'}">
-                        <input type="text" id="alasan_${nra}" value="${currentAlasan}" placeholder="Tuliskan alasan tidak ikut..." class="w-full bg-gray-950 border border-gray-700 text-xs rounded-xl px-3 py-2 text-gray-200 focus:outline-none focus:border-rose-500">
+                        <input type="text" id="alasan_${nra}" value="${currentAlasan}" placeholder="Wajib isi alasan tidak ikut..." class="w-full bg-gray-950 border border-gray-700 text-xs rounded-xl px-3 py-2 text-gray-200 focus:outline-none focus:border-rose-500">
                     </div>
                 `;
                 modalMemberList.appendChild(div);
@@ -682,12 +685,11 @@
                 return;
             }
 
-            btnSavePeserta.innerText = 'Menyimpan...';
-            btnSavePeserta.disabled = true;
-
             let newParticipantMap = {};
             let newReasonMap = {};
             let upsertPayloads = [];
+            let hasError = false;
+            let errorMessage = '';
 
             globalMembers.forEach(m => {
                 const nra = m.nra;
@@ -702,6 +704,10 @@
                 if (selectedVal === 'tidak') {
                     const inputAlasan = document.getElementById(`alasan_${nra}`);
                     alasanVal = inputAlasan ? inputAlasan.value.trim() : '';
+                    if (!alasanVal) {
+                        hasError = true;
+                        errorMessage = `Member dengan NRA ${nra} memilih "Tidak", tetapi alasan wajib diisi!`;
+                    }
                 }
 
                 newParticipantMap[nra] = selectedVal;
@@ -714,6 +720,14 @@
                     alasan: alasanVal
                 });
             });
+
+            if (hasError) {
+                alert(errorMessage);
+                return;
+            }
+
+            btnSavePeserta.innerText = 'Menyimpan...';
+            btnSavePeserta.disabled = true;
 
             try {
                 await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
