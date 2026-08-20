@@ -7,13 +7,13 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b0f19] text-white font-sans antialiased flex items-center justify-center min-h-screen relative" style="background-image: url('1.Frequensi.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+<body class="text-white font-sans antialiased flex items-center justify-center min-h-screen relative" style="background-image: url('1.Frequensi.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #07090e;">
 
-    <!-- Dark Overlay agar teks tetap jelas terbaca -->
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    <!-- Dark Overlay tipis agar teks tetap kontras -->
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-[2px]"></div>
 
-    <!-- Kotak Login (z-10 agar berada di atas overlay) -->
-    <div class="relative z-10 w-full max-w-md p-8 bg-[#121826]/90 border border-gray-800 rounded-2xl shadow-2xl text-center backdrop-blur-md">
+    <!-- Kotak Login -->
+    <div class="relative z-10 w-full max-w-md p-8 bg-[#121826]/95 border border-gray-800 rounded-2xl shadow-2xl text-center backdrop-blur-md">
         <!-- Logo / Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold tracking-wider text-orange-500">ONE <span class="text-white">Frequency</span></h1>
@@ -57,7 +57,7 @@
 
     <!-- JavaScript untuk Interaksi -->
     <script>
-        const correctPassword = "admin123"; // Ganti password admin jika perlu
+        const correctPassword = "admin123"; 
 
         function loginAsMember() {
             window.location.href = "dashboard.html"; 
