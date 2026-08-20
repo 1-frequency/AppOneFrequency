@@ -92,21 +92,57 @@
 
         <!-- SECTION 2: REKAP KAS MEMBER -->
         <section class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-7 bg-orange-500 rounded-full"></div>
                     <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
                 </div>
                 
-                <!-- Filter Pills -->
-                <div class="flex bg-gray-900 p-1.5 rounded-2xl border border-gray-800 text-xs font-semibold shadow-inner">
-                    <button id="btn-filter-semua" class="px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
-                    <button id="btn-filter-belum" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200">Belum Bayar</button>
-                    <button id="btn-filter-lunas" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200">Lunas</button>
+                <!-- Panel Filter Lengkap (Sesi, Bulan, Tahun, Status) -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Dropdown Filter Sesi -->
+                    <select id="filter-sesi" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
+                        <option value="semua">Semua Sesi</option>
+                        <option value="1">Sesi 1</option>
+                        <option value="2">Sesi 2</option>
+                        <option value="3">Sesi 3</option>
+                        <option value="4">Sesi 4</option>
+                    </select>
+
+                    <!-- Dropdown Filter Bulan -->
+                    <select id="filter-bulan" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
+                        <option value="semua">Semua Bulan</option>
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+
+                    <!-- Dropdown Filter Tahun -->
+                    <select id="filter-tahun" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
+                        <option value="semua">Semua Tahun</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+
+                    <!-- Filter Status Pills -->
+                    <div class="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs font-semibold shadow-inner">
+                        <button id="btn-filter-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
+                        <button id="btn-filter-belum" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Belum</button>
+                        <button id="btn-filter-lunas" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Lunas</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tabel Glassmorphism (Kolom: Member, NRA, Sesi, Total Kas, Status) -->
+            <!-- Tabel Glassmorphism -->
             <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
@@ -137,7 +173,9 @@
 
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let allKasData = [];
+        let globalMembers = [];
+        let globalTransactions = [];
+        let currentStatusFilter = 'semua'; // 'semua', 'belum', 'lunas'
 
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
@@ -192,7 +230,7 @@
             }
         }
 
-        // 2. RENDER TABEL KAS (5 Kolom: Member, NRA, Sesi, Total Kas, Status)
+        // 2. RENDER TABEL KAS
         function renderKasTable(data) {
             const tableBody = document.getElementById('kas-table-body');
             tableBody.innerHTML = ''; 
@@ -220,50 +258,131 @@
             });
         }
 
-        // 3. FILTER KAS (Semua, Belum Bayar, Lunas)
-        function filterKas(type) {
-            const btnSemua = document.getElementById('btn-filter-semua');
-            const btnBelum = document.getElementById('btn-filter-belum');
-            const btnLunas = document.getElementById('btn-filter-lunas');
+        // 3. FUNGSI UTAMA PROSES & FILTER DATA
+        function processAndFilterData() {
+            const filterSesi = document.getElementById('filter-sesi').value;
+            const filterBulan = document.getElementById('filter-bulan').value;
+            const filterTahun = document.getElementById('filter-tahun').value;
 
-            [btnSemua, btnBelum, btnLunas].forEach(btn => {
-                btn.className = "px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200";
+            // Filter transaksi berdasarkan Sesi, Bulan, dan Tahun
+            const filteredTx = globalTransactions.filter(tx => {
+                const txSesi = String(tx.sesi || tx.session || '');
+                const txDateStr = tx.created_at || tx.tanggal || tx.date;
+                
+                // Cek Sesi
+                if (filterSesi !== 'semua' && txSesi !== filterSesi) {
+                    return false;
+                }
+
+                if (txDateStr) {
+                    const d = new Date(txDateStr);
+                    const txMonth = String(d.getMonth() + 1);
+                    const txYear = String(d.getFullYear());
+
+                    // Cek Bulan
+                    if (filterBulan !== 'semua' && txMonth !== filterBulan) {
+                        return false;
+                    }
+                    // Cek Tahun
+                    if (filterTahun !== 'semua' && txYear !== filterTahun) {
+                        return false;
+                    }
+                } else if (filterBulan !== 'semua' || filterTahun !== 'semua') {
+                    return false; // Jika transaksi tidak ada tanggal tapi user memfilter tanggal
+                }
+
+                return true;
             });
 
-            let filteredData = allKasData;
+            // Map ke rekap member
+            let processedData = globalMembers.map(member => {
+                const memberNra = member.nra;
+                const memberName = member.nama_lengkap || member.name || member.member_name || 'Member';
 
-            if (type === 'belum') {
-                btnBelum.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
-                filteredData = allKasData.filter(row => row.status_final !== 'LUNAS 100%');
-            } else if (type === 'lunas') {
-                btnLunas.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
-                filteredData = allKasData.filter(row => row.status_final === 'LUNAS 100%');
-            } else {
-                btnSemua.className = "px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200";
+                const memberTx = filteredTx.filter(tx => 
+                    (tx.nra && tx.nra === memberNra) || 
+                    (tx.nama_lengkap && tx.nama_lengkap.toLowerCase() === memberName.toLowerCase())
+                );
+
+                const paidSessionsSet = new Set();
+                let totalKas = 0;
+
+                memberTx.forEach(tx => {
+                    const sesi = tx.sesi || tx.session;
+                    const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
+                    if (jumlah > 0 && sesi) {
+                        paidSessionsSet.add(`Sesi ${sesi}`);
+                    }
+                    totalKas += jumlah;
+                });
+
+                const paidSessionsArr = Array.from(paidSessionsSet).sort();
+                const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
+                
+                // Jika sedang memfilter sesi tertentu, status lunas dihitung dari sesi tersebut atau total 4 sesi
+                const isLunas = filterSesi !== 'semua' ? paidSessionsArr.length > 0 : paidSessionsArr.length >= 4;
+
+                return {
+                    nama_lengkap: memberName,
+                    nra: memberNra || '-',
+                    sesi_str: sesiStr,
+                    total_kas_terbayar: totalKas,
+                    status_final: isLunas ? 'LUNAS 100%' : 'BELUM LUNAS'
+                };
+            });
+
+            // Filter Status (Semua / Belum / Lunas)
+            if (currentStatusFilter === 'belum') {
+                processedData = processedData.filter(row => row.status_final !== 'LUNAS 100%');
+            } else if (currentStatusFilter === 'lunas') {
+                processedData = processedData.filter(row => row.status_final === 'LUNAS 100%');
             }
 
-            renderKasTable(filteredData);
+            renderKasTable(processedData);
         }
 
-        document.getElementById('btn-filter-semua').addEventListener('click', () => filterKas('semua'));
-        document.getElementById('btn-filter-belum').addEventListener('click', () => filterKas('belum'));
-        document.getElementById('btn-filter-lunas').addEventListener('click', () => filterKas('lunas'));
+        // 4. EVENT LISTENERS FILTER
+        document.getElementById('filter-sesi').addEventListener('change', processAndFilterData);
+        document.getElementById('filter-bulan').addEventListener('change', processAndFilterData);
+        document.getElementById('filter-tahun').addEventListener('change', processAndFilterData);
 
-        // 4. AMBIL DATA DARI TABEL MEMBERS & TRANSACTIONS
+        const btnSemua = document.getElementById('btn-filter-semua');
+        const btnBelum = document.getElementById('btn-filter-belum');
+        const btnLunas = document.getElementById('btn-filter-lunas');
+
+        function setStatusFilter(type) {
+            currentStatusFilter = type;
+            [btnSemua, btnBelum, btnLunas].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200";
+            });
+
+            if (type === 'belum') {
+                btnBelum.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            } else if (type === 'lunas') {
+                btnLunas.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            } else {
+                btnSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            }
+
+            processAndFilterData();
+        }
+
+        btnSemua.addEventListener('click', () => setStatusFilter('semua'));
+        btnBelum.addEventListener('click', () => setStatusFilter('belum'));
+        btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
+
+        // 5. AMBIL DATA DARI SUPABASE
         async function fetchKasData() {
             try {
-                // Ambil daftar master member
-                let membersList = [];
                 let { data: membersData, error: membersError } = await db.from('members').select('*');
-                
-                // Ambil data transaksi
                 const { data: transactions, error: txError } = await db.from('transactions').select('*');
                 if (txError) throw txError;
 
-                // Jika tabel 'members' tidak ada/kosong, ambil unique member dari 'transactions'
+                globalTransactions = transactions || [];
+
                 if (membersError || !membersData || membersData.length === 0) {
                     const uniqueMap = {};
-                    (transactions || []).forEach(tx => {
+                    globalTransactions.forEach(tx => {
                         const key = tx.nra || tx.nama_lengkap || tx.member_name;
                         if (key && !uniqueMap[key]) {
                             uniqueMap[key] = {
@@ -272,47 +391,12 @@
                             };
                         }
                     });
-                    membersList = Object.values(uniqueMap);
+                    globalMembers = Object.values(uniqueMap);
                 } else {
-                    membersList = membersData;
+                    globalMembers = membersData;
                 }
 
-                // Gabungkan dan petakan status pembayaran per member
-                allKasData = membersList.map(member => {
-                    const memberNra = member.nra;
-                    const memberName = member.nama_lengkap || member.name || member.member_name || 'Member';
-
-                    const memberTx = (transactions || []).filter(tx => 
-                        (tx.nra && tx.nra === memberNra) || 
-                        (tx.nama_lengkap && tx.nama_lengkap.toLowerCase() === memberName.toLowerCase())
-                    );
-
-                    const paidSessionsSet = new Set();
-                    let totalKas = 0;
-
-                    memberTx.forEach(tx => {
-                        const sesi = tx.sesi || tx.session;
-                        const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
-                        if (jumlah > 0 && sesi) {
-                            paidSessionsSet.add(`Sesi ${sesi}`);
-                        }
-                        totalKas += jumlah;
-                    });
-
-                    const paidSessionsArr = Array.from(paidSessionsSet).sort();
-                    const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
-                    const isLunas = paidSessionsArr.length >= 4;
-
-                    return {
-                        nama_lengkap: memberName,
-                        nra: memberNra || '-',
-                        sesi_str: sesiStr,
-                        total_kas_terbayar: totalKas,
-                        status_final: isLunas ? 'LUNAS 100%' : 'BELUM LUNAS'
-                    };
-                });
-
-                renderKasTable(allKasData);
+                processAndFilterData();
             } catch (err) {
                 console.error("Error mengambil rekap kas: ", err.message);
                 document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 italic">Gagal memuat data kas. Periksa koneksi atau database Anda.</td></tr>`;
