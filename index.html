@@ -45,9 +45,8 @@
 
     <main class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
         
-        <!-- SECTION 1: NEXT TOURING (Desain Mewah & Glowing) -->
+        <!-- SECTION 1: NEXT TOURING -->
         <section class="touring-glow rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950">
-            <!-- Background Accent Shape -->
             <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="flex justify-between items-start mb-4">
@@ -99,7 +98,7 @@
                     <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
                 </div>
                 
-                <!-- Filter Pills Mewah -->
+                <!-- Filter Pills -->
                 <div class="flex bg-gray-900 p-1.5 rounded-2xl border border-gray-800 text-xs font-semibold shadow-inner">
                     <button id="btn-filter-semua" class="px-4 py-2 rounded-xl bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
                     <button id="btn-filter-belum" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-all duration-200">Belum Bayar</button>
@@ -135,11 +134,9 @@
     <!-- SCRIPT KONEKSI SUPABASE & LOGIKA -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // --- ⚠️ PERHATIKAN: GANTI KODE DI BAWAH INI DENGAN SUPABASE URL & ANON KEY YANG VALID DARI DASHBOARD ANDA ---
         const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4'; // Salin anon key asli Anda dari settings -> API Supabase jika key lama error 401
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
-        // Inisialisasi Klien Supabase
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allKasData = [];
@@ -235,7 +232,7 @@
             });
         }
 
-        // 3. FILTER KAS
+        // 3. FILTER KAS (Semua, Belum Bayar, Lunas)
         function filterKas(type) {
             const btnSemua = document.getElementById('btn-filter-semua');
             const btnBelum = document.getElementById('btn-filter-belum');
@@ -264,21 +261,62 @@
         document.getElementById('btn-filter-belum').addEventListener('click', () => filterKas('belum'));
         document.getElementById('btn-filter-lunas').addEventListener('click', () => filterKas('lunas'));
 
-        // 4. AMBIL DATA KAS
+        // 4. AMBIL DATA DARI TABEL TRANSACTIONS SUPABASE
         async function fetchKasData() {
             try {
-                const { data, error } = await db
-                    .from('view_rekap_kas_member')
-                    .select('*')
-                    .order('nama_lengkap', { ascending: true });
+                const { data: transactions, error } = await db
+                    .from('transactions')
+                    .select('*');
 
                 if (error) throw error;
 
-                allKasData = data || [];
+                if (!transactions || transactions.length === 0) {
+                    allKasData = [];
+                    renderKasTable(allKasData);
+                    return;
+                }
+
+                // Grouping transaksi per member / NRA
+                const memberMap = {};
+
+                transactions.forEach(tx => {
+                    const identifier = tx.nra || tx.nama_lengkap || tx.member_name || 'Member';
+                    if (!memberMap[identifier]) {
+                        memberMap[identifier] = {
+                            nama_lengkap: tx.nama_lengkap || tx.member_name || tx.nra || 'Member',
+                            nra: tx.nra || '-',
+                            lunas_sesi_1: 0,
+                            lunas_sesi_2: 0,
+                            lunas_sesi_3: 0,
+                            lunas_sesi_4: 0,
+                            total_kas_terbayar: 0
+                        };
+                    }
+
+                    const sesi = parseInt(tx.sesi || tx.session || 1);
+                    const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
+
+                    if (sesi === 1) memberMap[identifier].lunas_sesi_1 += (jumlah > 0 ? 1 : 0);
+                    if (sesi === 2) memberMap[identifier].lunas_sesi_2 += (jumlah > 0 ? 1 : 0);
+                    if (sesi === 3) memberMap[identifier].lunas_sesi_3 += (jumlah > 0 ? 1 : 0);
+                    if (sesi === 4) memberMap[identifier].lunas_sesi_4 += (jumlah > 0 ? 1 : 0);
+
+                    memberMap[identifier].total_kas_terbayar += jumlah;
+                });
+
+                // Mapping ke array dan tentukan status final lunas (jika sudah bayar di ke-4 sesi)
+                allKasData = Object.values(memberMap).map(member => {
+                    const isLunas = (member.lunas_sesi_1 > 0 && member.lunas_sesi_2 > 0 && member.lunas_sesi_3 > 0 && member.lunas_sesi_4 > 0);
+                    return {
+                        ...member,
+                        status_final: isLunas ? 'LUNAS 100%' : 'BELUM LUNAS'
+                    };
+                });
+
                 renderKasTable(allKasData);
             } catch (err) {
-                console.error("Error mengambil rekap kas: ", err.message);
-                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400 italic">Gagal memuat data kas. Periksa Anon Key Supabase Anda.</td></tr>`;
+                console.error("Error mengambil rekap kas dari transactions: ", err.message);
+                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400 italic">Gagal memuat data dari tabel transactions.</td></tr>`;
             }
         }
 
