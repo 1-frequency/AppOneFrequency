@@ -106,23 +106,21 @@
                 </div>
             </div>
 
-            <!-- Tabel Glassmorphism -->
+            <!-- Tabel Glassmorphism (Kolom: Member, NRA, Sesi, Total Kas, Status) -->
             <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
                         <tr>
                             <th class="p-4 font-semibold">Member</th>
-                            <th class="p-4 text-center font-semibold">Sesi 1</th>
-                            <th class="p-4 text-center font-semibold">Sesi 2</th>
-                            <th class="p-4 text-center font-semibold">Sesi 3</th>
-                            <th class="p-4 text-center font-semibold">Sesi 4</th>
+                            <th class="p-4 font-semibold">NRA</th>
+                            <th class="p-4 text-center font-semibold">Sesi</th>
                             <th class="p-4 text-right font-semibold">Total Kas</th>
                             <th class="p-4 text-center font-semibold">Status</th>
                         </tr>
                     </thead>
                     <tbody id="kas-table-body" class="divide-y divide-gray-800/60">
                         <tr>
-                            <td colspan="7" class="p-8 text-center text-gray-500 italic">Memuat data kas member...</td>
+                            <td colspan="5" class="p-8 text-center text-gray-500 italic">Memuat data kas member...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -194,22 +192,17 @@
             }
         }
 
-        // 2. RENDER TABEL KAS
+        // 2. RENDER TABEL KAS (5 Kolom: Member, NRA, Sesi, Total Kas, Status)
         function renderKasTable(data) {
             const tableBody = document.getElementById('kas-table-body');
             tableBody.innerHTML = ''; 
 
             if(!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-gray-500 italic">Tidak ada data yang sesuai dengan filter.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Tidak ada data yang sesuai dengan filter.</td></tr>';
                 return;
             }
 
             data.forEach(row => {
-                const s1 = row.lunas_sesi_1 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
-                const s2 = row.lunas_sesi_2 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
-                const s3 = row.lunas_sesi_3 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
-                const s4 = row.lunas_sesi_4 > 0 ? '<span class="text-emerald-400 font-bold">✓</span>' : '<span class="text-gray-600">-</span>';
-                
                 const statusBadge = row.status_final === 'LUNAS 100%' 
                     ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20 shadow-sm">LUNAS</span>` 
                     : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/20 shadow-sm">BELUM</span>`;
@@ -217,14 +210,9 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
                 tr.innerHTML = `
-                    <td class="p-4">
-                        <div class="font-bold text-gray-100">${row.nama_lengkap}</div>
-                        <div class="text-xs text-gray-500 font-mono">NRA: ${row.nra || '-'}</div>
-                    </td>
-                    <td class="p-4 text-center">${s1}</td>
-                    <td class="p-4 text-center">${s2}</td>
-                    <td class="p-4 text-center">${s3}</td>
-                    <td class="p-4 text-center">${s4}</td>
+                    <td class="p-4 font-bold text-gray-100">${row.nama_lengkap}</td>
+                    <td class="p-4 text-gray-400 font-mono">${row.nra || '-'}</td>
+                    <td class="p-4 text-center text-gray-300 font-medium">${row.sesi_str}</td>
                     <td class="p-4 text-right font-mono font-semibold text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
                     <td class="p-4 text-center">${statusBadge}</td>
                 `;
@@ -261,62 +249,73 @@
         document.getElementById('btn-filter-belum').addEventListener('click', () => filterKas('belum'));
         document.getElementById('btn-filter-lunas').addEventListener('click', () => filterKas('lunas'));
 
-        // 4. AMBIL DATA DARI TABEL TRANSACTIONS SUPABASE
+        // 4. AMBIL DATA DARI TABEL MEMBERS & TRANSACTIONS
         async function fetchKasData() {
             try {
-                const { data: transactions, error } = await db
-                    .from('transactions')
-                    .select('*');
+                // Ambil daftar master member
+                let membersList = [];
+                let { data: membersData, error: membersError } = await db.from('members').select('*');
+                
+                // Ambil data transaksi
+                const { data: transactions, error: txError } = await db.from('transactions').select('*');
+                if (txError) throw txError;
 
-                if (error) throw error;
-
-                if (!transactions || transactions.length === 0) {
-                    allKasData = [];
-                    renderKasTable(allKasData);
-                    return;
+                // Jika tabel 'members' tidak ada/kosong, ambil unique member dari 'transactions'
+                if (membersError || !membersData || membersData.length === 0) {
+                    const uniqueMap = {};
+                    (transactions || []).forEach(tx => {
+                        const key = tx.nra || tx.nama_lengkap || tx.member_name;
+                        if (key && !uniqueMap[key]) {
+                            uniqueMap[key] = {
+                                nama_lengkap: tx.nama_lengkap || tx.member_name || tx.nra || 'Member',
+                                nra: tx.nra || '-'
+                            };
+                        }
+                    });
+                    membersList = Object.values(uniqueMap);
+                } else {
+                    membersList = membersData;
                 }
 
-                // Grouping transaksi per member / NRA
-                const memberMap = {};
+                // Gabungkan dan petakan status pembayaran per member
+                allKasData = membersList.map(member => {
+                    const memberNra = member.nra;
+                    const memberName = member.nama_lengkap || member.name || member.member_name || 'Member';
 
-                transactions.forEach(tx => {
-                    const identifier = tx.nra || tx.nama_lengkap || tx.member_name || 'Member';
-                    if (!memberMap[identifier]) {
-                        memberMap[identifier] = {
-                            nama_lengkap: tx.nama_lengkap || tx.member_name || tx.nra || 'Member',
-                            nra: tx.nra || '-',
-                            lunas_sesi_1: 0,
-                            lunas_sesi_2: 0,
-                            lunas_sesi_3: 0,
-                            lunas_sesi_4: 0,
-                            total_kas_terbayar: 0
-                        };
-                    }
+                    const memberTx = (transactions || []).filter(tx => 
+                        (tx.nra && tx.nra === memberNra) || 
+                        (tx.nama_lengkap && tx.nama_lengkap.toLowerCase() === memberName.toLowerCase())
+                    );
 
-                    const sesi = parseInt(tx.sesi || tx.session || 1);
-                    const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
+                    const paidSessionsSet = new Set();
+                    let totalKas = 0;
 
-                    if (sesi === 1) memberMap[identifier].lunas_sesi_1 += (jumlah > 0 ? 1 : 0);
-                    if (sesi === 2) memberMap[identifier].lunas_sesi_2 += (jumlah > 0 ? 1 : 0);
-                    if (sesi === 3) memberMap[identifier].lunas_sesi_3 += (jumlah > 0 ? 1 : 0);
-                    if (sesi === 4) memberMap[identifier].lunas_sesi_4 += (jumlah > 0 ? 1 : 0);
+                    memberTx.forEach(tx => {
+                        const sesi = tx.sesi || tx.session;
+                        const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
+                        if (jumlah > 0 && sesi) {
+                            paidSessionsSet.add(`Sesi ${sesi}`);
+                        }
+                        totalKas += jumlah;
+                    });
 
-                    memberMap[identifier].total_kas_terbayar += jumlah;
-                });
+                    const paidSessionsArr = Array.from(paidSessionsSet).sort();
+                    const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
+                    const isLunas = paidSessionsArr.length >= 4;
 
-                // Mapping ke array dan tentukan status final lunas (jika sudah bayar di ke-4 sesi)
-                allKasData = Object.values(memberMap).map(member => {
-                    const isLunas = (member.lunas_sesi_1 > 0 && member.lunas_sesi_2 > 0 && member.lunas_sesi_3 > 0 && member.lunas_sesi_4 > 0);
                     return {
-                        ...member,
+                        nama_lengkap: memberName,
+                        nra: memberNra || '-',
+                        sesi_str: sesiStr,
+                        total_kas_terbayar: totalKas,
                         status_final: isLunas ? 'LUNAS 100%' : 'BELUM LUNAS'
                     };
                 });
 
                 renderKasTable(allKasData);
             } catch (err) {
-                console.error("Error mengambil rekap kas dari transactions: ", err.message);
-                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400 italic">Gagal memuat data dari tabel transactions.</td></tr>`;
+                console.error("Error mengambil rekap kas: ", err.message);
+                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 italic">Gagal memuat data kas. Periksa koneksi atau database Anda.</td></tr>`;
             }
         }
 
