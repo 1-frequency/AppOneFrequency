@@ -24,12 +24,12 @@
         <div id="role-selection" class="space-y-3">
             <p class="text-xs font-medium text-gray-300 mb-3 drop-shadow">Silakan pilih akses masuk:</p>
             
-            <!-- Tombol Member (Lebih Ringkas) -->
-            <button onclick="loginAsMember()" class="w-full py-2.5 px-4 bg-[#121826]/80 hover:bg-[#1f293d] border border-gray-700/80 rounded-xl text-sm font-medium transition duration-200 flex items-center justify-center space-x-2 text-gray-200 backdrop-blur-md shadow-md">
+            <!-- Tombol Member -->
+            <button onclick="loginAsMember()" class="w-full py-2.5 px-4 bg-[#121826]/80 hover:bg-[#1f293d] border border-gray-700/85 rounded-xl text-sm font-medium transition duration-200 flex items-center justify-center space-x-2 text-gray-200 backdrop-blur-md shadow-md">
                 <span>👤 Masuk sebagai Member</span>
             </button>
 
-            <!-- Tombol Admin (Lebih Ringkas) -->
+            <!-- Tombol Admin -->
             <button onclick="showAdminPasswordInput()" class="w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-700 rounded-xl text-sm font-medium transition duration-200 shadow-md shadow-orange-600/30 flex items-center justify-center space-x-2 text-white">
                 <span>🔐 Masuk sebagai Admin</span>
             </button>
@@ -55,12 +55,13 @@
         </div>
     </div>
 
-    <!-- JavaScript untuk Interaksi -->
+    <!-- JavaScript untuk Interaksi & Routing -->
     <script>
-        const correctPassword = "admin123"; 
+        const correctPassword = "admin123"; // Anda bisa ubah password admin di sini
 
         function loginAsMember() {
-            window.location.href = "dashboard.html"; 
+            // Mengarahkan ke halaman index.html untuk member
+            window.location.href = "index.html"; 
         }
 
         function showAdminPasswordInput() {
@@ -80,7 +81,8 @@
             const errorMsg = document.getElementById('error-msg');
 
             if (pass === correctPassword) {
-                window.location.href = "dashboard-admin.html"; 
+                // Mengarahkan ke halaman admin.html jika password benar
+                window.location.href = "admin.html"; 
             } else {
                 errorMsg.classList.remove('hidden');
             }
