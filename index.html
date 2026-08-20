@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneFrequency - Dashboard Keuangan & Manajemen Touring Ala OneFrequency</title>
+    <title>OneFrequency - Dashboard Keuangan & Touring Ala OneFrequency</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Library -->
@@ -49,7 +49,7 @@
         <section class="touring-glow rounded-3xl p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950">
             <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="flex justify-between items-start mb-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-widest text-orange-400 bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20">
                         Next Touring Agenda
@@ -59,6 +59,12 @@
                         <svg class="w-4 h-4 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Tujuan: <span id="touring-dest" class="text-white font-semibold ml-1">-</span>
                     </p>
+                </div>
+                
+                <!-- Info Bendahara di Sebelah Kanan Teks Cilacap -->
+                <div class="bg-gray-800/80 border border-gray-700/60 px-4 py-2.5 rounded-xl text-xs shadow-inner shrink-0">
+                    <span class="text-orange-400 font-semibold block">Info : bendahara</span>
+                    <span class="text-gray-200 font-mono text-sm tracking-wide">Bank BNI 1949890702</span>
                 </div>
             </div>
             
@@ -114,7 +120,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-7 bg-orange-500 rounded-full"></div>
-                    <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
+                    <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member OneFrequency</h3>
                 </div>
                 
                 <button id="btn-toggle-rekap" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
@@ -226,74 +232,6 @@
             </div>
         </section>
 
-        <!-- SECTION 4: RIWAYAT TRANSAKSI -->
-        <section class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-2.5 h-7 bg-cyan-500 rounded-full"></div>
-                    <h3 class="text-xl font-bold tracking-tight text-white">Riwayat Transaksi</h3>
-                </div>
-                
-                <button id="btn-toggle-riwayat" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
-                    <span id="text-toggle-riwayat">Lihat Riwayat Transaksi</span>
-                    <svg id="icon-chevron-riwayat" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-            </div>
-
-            <div id="content-riwayat-transaksi" class="space-y-4 hidden">
-                <!-- Kartu Total Pemasukan & Pengeluaran -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-gray-900/80 p-4 rounded-2xl border border-gray-800 flex items-center justify-between shadow-md">
-                        <div>
-                            <p class="text-xs text-gray-400 font-medium">Total Pemasukan</p>
-                            <p class="font-black text-lg text-emerald-400 mt-1" id="total-pemasukan">Rp 0</p>
-                        </div>
-                        <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        </div>
-                    </div>
-                    <div class="bg-gray-900/80 p-4 rounded-2xl border border-gray-800 flex items-center justify-between shadow-md">
-                        <div>
-                            <p class="text-xs text-gray-400 font-medium">Total Pengeluaran</p>
-                            <p class="font-black text-lg text-rose-400 mt-1" id="total-pengeluaran">Rp 0</p>
-                        </div>
-                        <div class="p-3 bg-rose-500/10 rounded-xl text-rose-400 border border-rose-500/20">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filter Jenis Transaksi -->
-                <div class="flex flex-wrap items-center justify-end gap-2">
-                    <div class="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs font-semibold shadow-inner">
-                        <button id="btn-trx-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
-                        <button id="btn-trx-masuk" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Pemasukan</button>
-                        <button id="btn-trx-keluar" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Pengeluaran</button>
-                    </div>
-                </div>
-
-                <!-- Tabel Riwayat Transaksi -->
-                <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
-                            <tr>
-                                <th class="p-4 font-semibold">Tanggal</th>
-                                <th class="p-4 font-semibold">Deskripsi</th>
-                                <th class="p-4 font-semibold">Kategori</th>
-                                <th class="p-4 text-center font-semibold">Jenis</th>
-                                <th class="p-4 text-right font-semibold">Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody id="riwayat-table-body" class="divide-y divide-gray-800/60">
-                            <tr>
-                                <td colspan="5" class="p-8 text-center text-gray-500 italic">Memuat riwayat transaksi...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <!-- MODAL CHECKLIST KEHADIRAN (FORM EDIT) -->
@@ -333,7 +271,6 @@
         let reasonMap = {}; 
         let currentStatusFilter = 'semua';
         let currentParticipantFilter = 'semua';
-        let currentTrxFilter = 'semua';
 
         // Logika Toggle Rekap Kas
         const btnToggleRekap = document.getElementById('btn-toggle-rekap');
@@ -361,22 +298,6 @@
             iconChevronDaftar.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
             if (!isHidden) {
                 renderDaftarPesertaTable();
-            }
-        });
-
-        // Logika Toggle Riwayat Transaksi
-        const btnToggleRiwayat = document.getElementById('btn-toggle-riwayat');
-        const contentRiwayat = document.getElementById('content-riwayat-transaksi');
-        const textToggleRiwayat = document.getElementById('text-toggle-riwayat');
-        const iconChevronRiwayat = document.getElementById('icon-chevron-riwayat');
-
-        btnToggleRiwayat.addEventListener('click', () => {
-            contentRiwayat.classList.toggle('hidden');
-            const isHidden = contentRiwayat.classList.contains('hidden');
-            textToggleRiwayat.innerText = isHidden ? 'Lihat Riwayat Transaksi' : 'Tutup Riwayat Transaksi';
-            iconChevronRiwayat.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
-            if (!isHidden) {
-                renderRiwayatTransaksi();
             }
         });
 
@@ -587,75 +508,6 @@
             });
         }
 
-        function renderRiwayatTransaksi() {
-            const tableBody = document.getElementById('riwayat-table-body');
-            if (!tableBody) return;
-            tableBody.innerHTML = '';
-
-            let totalMasuk = 0;
-            let totalKeluar = 0;
-
-            globalTransactions.forEach(tx => {
-                const amount = parseFloat(tx.amount || 0);
-                const type = String(tx.type || '').toLowerCase();
-                if (type === 'keluar' || type === 'expense' || type === 'pengeluaran') {
-                    totalKeluar += amount;
-                } else {
-                    totalMasuk += amount;
-                }
-            });
-
-            document.getElementById('total-pemasukan').innerText = formatRupiah(totalMasuk);
-            document.getElementById('total-pengeluaran').innerText = formatRupiah(totalKeluar);
-
-            let filtered = globalTransactions.filter(tx => {
-                const type = String(tx.type || '').toLowerCase();
-                const isKeluar = type === 'keluar' || type === 'expense' || type === 'pengeluaran';
-                if (currentTrxFilter === 'masuk' && isKeluar) return false;
-                if (currentTrxFilter === 'keluar' && !isKeluar) return false;
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Tidak ada data transaksi.</td></tr>';
-                return;
-            }
-
-            filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-
-            filtered.forEach(tx => {
-                const amount = parseFloat(tx.amount || 0);
-                const type = String(tx.type || '').toLowerCase();
-                const isKeluar = type === 'keluar' || type === 'expense' || type === 'pengeluaran';
-                
-                const jenisBadge = isKeluar
-                    ? `<span class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-bold">PENGELUARAN</span>`
-                    : `<span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold">PEMASUKAN</span>`;
-
-                const nominalClass = isKeluar ? 'text-rose-400' : 'text-emerald-400';
-                const prefix = isKeluar ? '- ' : '+ ';
-
-                let tglStr = '-';
-                if (tx.created_at) {
-                    const d = new Date(tx.created_at);
-                    if (!isNaN(d)) {
-                        tglStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                    }
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
-                tr.innerHTML = `
-                    <td class="p-4 text-gray-300 font-mono text-xs">${tglStr}</td>
-                    <td class="p-4 text-gray-100 font-medium">${tx.description || '-'}</td>
-                    <td class="p-4 text-gray-400">${tx.category || '-'}</td>
-                    <td class="p-4 text-center">${jenisBadge}</td>
-                    <td class="p-4 text-right font-mono font-bold ${nominalClass}">${prefix}${formatRupiah(amount)}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
         function processAndFilterData() {
             const filterSesi = document.getElementById('filter-sesi').value;
             const filterBulan = document.getElementById('filter-bulan').value;
@@ -754,26 +606,6 @@
         btnPSemua.addEventListener('click', () => setParticipantFilter('semua'));
         btnPIkut.addEventListener('click', () => setParticipantFilter('ikut'));
         btnPTidak.addEventListener('click', () => setParticipantFilter('tidak'));
-
-        // Sub-filter Riwayat Transaksi
-        const btnTrxSemua = document.getElementById('btn-trx-semua');
-        const btnTrxMasuk = document.getElementById('btn-trx-masuk');
-        const btnTrxKeluar = document.getElementById('btn-trx-keluar');
-
-        function setTrxFilter(type) {
-            currentTrxFilter = type;
-            [btnTrxSemua, btnTrxMasuk, btnTrxKeluar].forEach(btn => {
-                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200";
-            });
-            if (type === 'masuk') btnTrxMasuk.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            else if (type === 'keluar') btnTrxKeluar.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            else btnTrxSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            renderRiwayatTransaksi();
-        }
-
-        btnTrxSemua.addEventListener('click', () => setTrxFilter('semua'));
-        btnTrxMasuk.addEventListener('click', () => setTrxFilter('masuk'));
-        btnTrxKeluar.addEventListener('click', () => setTrxFilter('keluar'));
 
         // MODAL CHECKLIST KEHADIRAN LOGIC
         const modal = document.getElementById('modal-peserta');
@@ -955,9 +787,6 @@
 
                 globalMembers = Object.values(memberMap);
                 processAndFilterData();
-                if (!contentRiwayat.classList.contains('hidden')) {
-                    renderRiwayatTransaksi();
-                }
             } catch (err) {
                 console.error("Error mengambil rekap kas: ", err.message);
             }
