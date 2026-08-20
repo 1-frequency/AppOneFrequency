@@ -181,6 +181,63 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         };
 
+        // Fungsi Helper untuk Parsing Sesi, Bulan, Tahun, Nama, & NRA dari Supabase (Category & Description)
+        function parseTransaction(tx) {
+            let sesi = '';
+            let bulan = '';
+            let tahun = '';
+            let nama = '';
+            let nra = '';
+
+            // 1. Ambil Sesi dari kolom 'category' (misal: "SESI 3" -> "3")
+            if (tx.category) {
+                const matchSesi = String(tx.category).match(/\d+/);
+                if (matchSesi) sesi = matchSesi[0];
+            }
+
+            // 2. Ambil dari kolom 'description' (format: "Bulan: 2026-08 | Sahrul (NRA: 0203)")
+            if (tx.description) {
+                // Ekstrak Bulan & Tahun ("2026-08")
+                const matchBulan = tx.description.match(/Bulan:\s*([0-9]{4}-[0-9]{2})/i);
+                if (matchBulan) {
+                    bulan = matchBulan[1]; 
+                    const parts = bulan.split('-');
+                    tahun = parts[0];
+                }
+
+                // Ekstrak NRA ("0203")
+                const matchNra = tx.description.match(/NRA:\s*([^)]+)/i);
+                if (matchNra) {
+                    nra = matchNra[1].trim();
+                }
+
+                // Ekstrak Nama ("Sahrul")
+                const matchNama = tx.description.match(/\|\s*([^|(]+)(?:\(NRA:|$)/i);
+                if (matchNama) {
+                    nama = matchNama[1].trim();
+                }
+            }
+
+            // Fallback ke created_at jika bulan tidak ditemukan di description
+            if (!bulan && tx.created_at) {
+                const d = new Date(tx.created_at);
+                if (!isNaN(d)) {
+                    bulan = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    tahun = String(d.getFullYear());
+                }
+            }
+
+            return {
+                ...tx,
+                parsed_sesi: sesi,
+                parsed_bulan: bulan,
+                parsed_tahun: tahun,
+                parsed_nama: nama,
+                parsed_nra: nra,
+                parsed_month_num: bulan ? String(parseInt(bulan.split('-')[1], 10)) : ''
+            };
+        }
+
         // 1. AMBIL DATA TOURING
         async function fetchTouringData() {
             try {
@@ -264,64 +321,42 @@
             const filterBulan = document.getElementById('filter-bulan').value;
             const filterTahun = document.getElementById('filter-tahun').value;
 
-            // Filter transaksi berdasarkan Sesi, Bulan (kolom bulan/created_at), dan Tahun
-            const filteredTx = globalTransactions.filter(tx => {
-                const txSesi = String(tx.sesi || tx.session || '');
-                
+            // Parse dan filter transaksi sesuai struktur database
+            const parsedTxList = globalTransactions.map(tx => parseTransaction(tx));
+
+            const filteredTx = parsedTxList.filter(tx => {
                 // Cek Sesi
-                if (filterSesi !== 'semua' && txSesi !== filterSesi) {
+                if (filterSesi !== 'semua' && tx.parsed_sesi !== filterSesi) {
                     return false;
                 }
-
-                let txMonth = '';
-                let txYear = '';
-
-                // Ambil dari kolom 'bulan' (format "YYYY-MM") atau tanggal transaksi
-                if (tx.bulan) {
-                    const parts = tx.bulan.split('-');
-                    if (parts.length >= 2) {
-                        txYear = parts[0];
-                        txMonth = String(parseInt(parts[1], 10));
-                    }
-                } else {
-                    const txDateStr = tx.created_at || tx.tanggal || tx.date;
-                    if (txDateStr) {
-                        const d = new Date(txDateStr);
-                        if (!isNaN(d)) {
-                            txMonth = String(d.getMonth() + 1);
-                            txYear = String(d.getFullYear());
-                        }
-                    }
-                }
-
                 // Cek Bulan
-                if (filterBulan !== 'semua' && txMonth !== filterBulan) {
+                if (filterBulan !== 'semua' && tx.parsed_month_num !== filterBulan) {
                     return false;
                 }
                 // Cek Tahun
-                if (filterTahun !== 'semua' && txYear !== filterTahun) {
+                if (filterTahun !== 'semua' && tx.parsed_tahun !== filterTahun) {
                     return false;
                 }
-
                 return true;
             });
 
             // Map ke rekap member
             let processedData = globalMembers.map(member => {
-                const memberNra = member.nra;
-                const memberName = member.nama_lengkap || member.name || member.member_name || 'Member';
+                const memberNra = String(member.nra || '').trim();
+                const memberName = String(member.nama_lengkap || member.name || member.member_name || '').toLowerCase();
 
-                const memberTx = filteredTx.filter(tx => 
-                    (tx.nra && String(tx.nra).trim() === String(memberNra).trim()) || 
-                    (tx.nama_lengkap && tx.nama_lengkap.toLowerCase() === memberName.toLowerCase())
-                );
+                const memberTx = filteredTx.filter(tx => {
+                    const txNra = tx.parsed_nra;
+                    const txNama = tx.parsed_nama.toLowerCase();
+                    return (txNra && memberNra && txNra === memberNra) || (txNama && memberName && txNama === memberName);
+                });
 
                 const paidSessionsSet = new Set();
                 let totalKas = 0;
 
                 memberTx.forEach(tx => {
-                    const sesi = tx.sesi || tx.session;
-                    const jumlah = parseFloat(tx.jumlah || tx.amount || 0);
+                    const sesi = tx.parsed_sesi;
+                    const jumlah = parseFloat(tx.amount || 0);
                     if (jumlah > 0 && sesi) {
                         paidSessionsSet.add(`Sesi ${sesi}`);
                     }
@@ -331,12 +366,11 @@
                 const paidSessionsArr = Array.from(paidSessionsSet).sort();
                 const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
                 
-                // Jika sedang memfilter sesi tertentu, status lunas dihitung dari pembayaran pada filter tersebut
                 const isLunas = filterSesi !== 'semua' ? paidSessionsArr.length > 0 : paidSessionsArr.length >= 4;
 
                 return {
-                    nama_lengkap: memberName,
-                    nra: memberNra || '-',
+                    nama_lengkap: member.nama_lengkap || member.name || 'Member',
+                    nra: member.nra || '-',
                     sesi_str: sesiStr,
                     total_kas_terbayar: totalKas,
                     status_final: isLunas ? 'LUNAS 100%' : 'BELUM LUNAS'
@@ -383,7 +417,7 @@
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
 
-        // 5. AMBIL DATA DARI SUPABASE
+        // 5. AMBIL DATA DARI SUPABASE & GABUNGKAN
         async function fetchKasData() {
             try {
                 let { data: membersData, error: membersError } = await db.from('members').select('*');
@@ -392,21 +426,27 @@
 
                 globalTransactions = transactions || [];
 
-                if (membersError || !membersData || membersData.length === 0) {
-                    const uniqueMap = {};
-                    globalTransactions.forEach(tx => {
-                        const key = tx.nra || tx.nama_lengkap || tx.member_name;
-                        if (key && !uniqueMap[key]) {
-                            uniqueMap[key] = {
-                                nama_lengkap: tx.nama_lengkap || tx.member_name || tx.nra || 'Member',
-                                nra: tx.nra || '-'
-                            };
-                        }
+                // Gabungkan member dari tabel members dan data transaksi (parsed dari description)
+                let memberMap = {};
+                if (membersData && membersData.length > 0) {
+                    membersData.forEach(m => {
+                        const key = m.nra || m.nama_lengkap;
+                        if (key) memberMap[key] = m;
                     });
-                    globalMembers = Object.values(uniqueMap);
-                } else {
-                    globalMembers = membersData;
                 }
+
+                globalTransactions.forEach(tx => {
+                    const parsed = parseTransaction(tx);
+                    const key = parsed.parsed_nra || parsed.parsed_nama;
+                    if (key && !memberMap[key]) {
+                        memberMap[key] = {
+                            nama_lengkap: parsed.parsed_nama || 'Member',
+                            nra: parsed.parsed_nra || '-'
+                        };
+                    }
+                });
+
+                globalMembers = Object.values(memberMap);
 
                 processAndFilterData();
             } catch (err) {
