@@ -206,7 +206,7 @@
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBhbm9uIiwiaWF0IjoxNzg3MDg3MzY2LCJleHAiOjIxMDI2NjMzNjZ9.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -523,30 +523,26 @@
                 });
                 newParticipantMap[nra] = selectedVal;
                 upsertPayloads.push({
-                    touring_id: Number(currentTouringId),
-                    nra: String(nra),
+                    touring_id: currentTouringId,
+                    nra: nra,
                     status: selectedVal
                 });
             });
 
             try {
-                // Hapus data lama berdasarkan touring_id
-                const { error: delError } = await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
-                if (delError) throw delError;
-
-                // Masukkan data baru jika ada
-                if (upsertPayloads.length > 0) {
-                    const { error: insError } = await db.from('touring_participants').insert(upsertPayloads);
-                    if (insError) throw insError;
-                }
+                await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
+                const { error } = await db.from('touring_participants').insert(upsertPayloads);
+                
+                if (error) throw error;
 
                 participantMap = newParticipantMap;
                 updateParticipantCount();
                 closeModal();
                 alert('Kehadiran peserta berhasil disimpan!');
             } catch (err) {
-                console.error('Gagal menyimpan:', err);
-                alert('Gagal: ' + (err.message || JSON.stringify(err)));
+                console.error('Gagal menyimpan:', err.message);
+                // Menampilkan error detail di alert agar bisa dilihat langsung
+                alert('Gagal: ' + err.message);
             } finally {
                 btnSavePeserta.innerText = 'Simpan Kehadiran';
                 btnSavePeserta.disabled = false;
