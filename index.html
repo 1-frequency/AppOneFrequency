@@ -369,6 +369,22 @@
             }
         });
 
+		// Logika Toggle Riwayat Transaksi
+        const btnToggleRiwayat = document.getElementById('btn-toggle-riwayat');
+        const contentRiwayat = document.getElementById('content-riwayat-transaksi');
+        const textToggleRiwayat = document.getElementById('text-toggle-riwayat');
+        const iconChevronRiwayat = document.getElementById('icon-chevron-riwayat');
+
+        btnToggleRiwayat.addEventListener('click', () => {
+            contentRiwayat.classList.toggle('hidden');
+            const isHidden = contentRiwayat.classList.contains('hidden');
+            textToggleRiwayat.innerText = isHidden ? 'Lihat Riwayat Transaksi' : 'Tutup Riwayat Transaksi';
+            iconChevronRiwayat.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!isHidden) {
+                renderRiwayatTransaksi();
+            }
+        });
+
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         };
