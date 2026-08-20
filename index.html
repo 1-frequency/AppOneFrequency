@@ -264,31 +264,43 @@
             const filterBulan = document.getElementById('filter-bulan').value;
             const filterTahun = document.getElementById('filter-tahun').value;
 
-            // Filter transaksi berdasarkan Sesi, Bulan, dan Tahun
+            // Filter transaksi berdasarkan Sesi, Bulan (kolom bulan/created_at), dan Tahun
             const filteredTx = globalTransactions.filter(tx => {
                 const txSesi = String(tx.sesi || tx.session || '');
-                const txDateStr = tx.created_at || tx.tanggal || tx.date;
                 
                 // Cek Sesi
                 if (filterSesi !== 'semua' && txSesi !== filterSesi) {
                     return false;
                 }
 
-                if (txDateStr) {
-                    const d = new Date(txDateStr);
-                    const txMonth = String(d.getMonth() + 1);
-                    const txYear = String(d.getFullYear());
+                let txMonth = '';
+                let txYear = '';
 
-                    // Cek Bulan
-                    if (filterBulan !== 'semua' && txMonth !== filterBulan) {
-                        return false;
+                // Ambil dari kolom 'bulan' (format "YYYY-MM") atau tanggal transaksi
+                if (tx.bulan) {
+                    const parts = tx.bulan.split('-');
+                    if (parts.length >= 2) {
+                        txYear = parts[0];
+                        txMonth = String(parseInt(parts[1], 10));
                     }
-                    // Cek Tahun
-                    if (filterTahun !== 'semua' && txYear !== filterTahun) {
-                        return false;
+                } else {
+                    const txDateStr = tx.created_at || tx.tanggal || tx.date;
+                    if (txDateStr) {
+                        const d = new Date(txDateStr);
+                        if (!isNaN(d)) {
+                            txMonth = String(d.getMonth() + 1);
+                            txYear = String(d.getFullYear());
+                        }
                     }
-                } else if (filterBulan !== 'semua' || filterTahun !== 'semua') {
-                    return false; // Jika transaksi tidak ada tanggal tapi user memfilter tanggal
+                }
+
+                // Cek Bulan
+                if (filterBulan !== 'semua' && txMonth !== filterBulan) {
+                    return false;
+                }
+                // Cek Tahun
+                if (filterTahun !== 'semua' && txYear !== filterTahun) {
+                    return false;
                 }
 
                 return true;
@@ -300,7 +312,7 @@
                 const memberName = member.nama_lengkap || member.name || member.member_name || 'Member';
 
                 const memberTx = filteredTx.filter(tx => 
-                    (tx.nra && tx.nra === memberNra) || 
+                    (tx.nra && String(tx.nra).trim() === String(memberNra).trim()) || 
                     (tx.nama_lengkap && tx.nama_lengkap.toLowerCase() === memberName.toLowerCase())
                 );
 
@@ -319,7 +331,7 @@
                 const paidSessionsArr = Array.from(paidSessionsSet).sort();
                 const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
                 
-                // Jika sedang memfilter sesi tertentu, status lunas dihitung dari sesi tersebut atau total 4 sesi
+                // Jika sedang memfilter sesi tertentu, status lunas dihitung dari pembayaran pada filter tersebut
                 const isLunas = filterSesi !== 'semua' ? paidSessionsArr.length > 0 : paidSessionsArr.length >= 4;
 
                 return {
