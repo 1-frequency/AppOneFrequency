@@ -206,14 +206,14 @@
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBhbm9uIiwiaWF0IjoxNzg3MDg3MzY2LCJleHAiOjIxMDI2NjMzNjZ9.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let globalMembers = [];
         let globalTransactions = [];
         let currentTouringId = null;
-        let participantMap = {}; // Penyimpan status nra -> 'ikut' / 'tidak'
+        let participantMap = {};
         let currentStatusFilter = 'semua';
 
         const formatRupiah = (angka) => {
@@ -269,7 +269,6 @@
             document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
         }
 
-        // HITUNG JUMLAH PESERTA IKUT
         function updateParticipantCount() {
             let count = 0;
             Object.values(participantMap).forEach(status => {
@@ -278,7 +277,6 @@
             document.getElementById('count-peserta').innerText = count;
         }
 
-        // 1. AMBIL DATA TOURING & PESERTA
         async function fetchTouringData() {
             try {
                 const { data, error } = await db
@@ -308,16 +306,11 @@
                         const selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
                         
                         const countdownEl = document.getElementById('touring-countdown');
-                        if (selisihHari > 0) {
-                            countdownEl.innerText = `${selisihHari} Hari Lagi`;
-                        } else if (selisihHari === 0) {
-                            countdownEl.innerText = 'Hari Ini!';
-                        } else {
-                            countdownEl.innerText = 'Sudah Lewat';
-                        }
+                        if (selisihHari > 0) countdownEl.innerText = `${selisihHari} Hari Lagi`;
+                        else if (selisihHari === 0) countdownEl.innerText = 'Hari Ini!';
+                        else countdownEl.innerText = 'Sudah Lewat';
                     }
 
-                    // Ambil data partisipan dari database
                     fetchParticipants();
                 } else {
                     document.getElementById('touring-name').innerText = "Belum Ada Jadwal";
@@ -348,7 +341,6 @@
             }
         }
 
-        // 2. RENDER TABEL KAS
         function renderKasTable(data) {
             const tableBody = document.getElementById('kas-table-body');
             tableBody.innerHTML = ''; 
@@ -360,8 +352,8 @@
 
             data.forEach(row => {
                 const statusBadge = row.status_final === 'LUNAS 100%' 
-                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20 shadow-sm">LUNAS</span>` 
-                    : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/20 shadow-sm">BELUM</span>`;
+                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/25 shadow-sm">LUNAS</span>` 
+                    : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/25 shadow-sm">BELUM</span>`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
@@ -432,7 +424,6 @@
             renderKasTable(processedData);
         }
 
-        // EVENT LISTENERS FILTER
         document.getElementById('filter-sesi').addEventListener('change', processAndFilterData);
         document.getElementById('filter-bulan').addEventListener('change', processAndFilterData);
         document.getElementById('filter-tahun').addEventListener('change', processAndFilterData);
@@ -456,7 +447,6 @@
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
 
-        // MODAL LOGIC
         const modal = document.getElementById('modal-peserta');
         const btnOpenModal = document.getElementById('btn-open-modal');
         const btnCloseModal = document.getElementById('btn-close-modal');
@@ -487,7 +477,7 @@
             globalMembers.forEach(m => {
                 const nra = m.nra || '-';
                 const nama = m.nama_lengkap || m.name || 'Member';
-                const currentStatus = participantMap[nra] || 'tidak'; // default tidak ikut
+                const currentStatus = participantMap[nra] || 'tidak';
 
                 const div = document.createElement('div');
                 div.className = "flex items-center justify-between py-2.5 px-2 hover:bg-gray-800/40 rounded-xl transition-colors";
@@ -511,7 +501,6 @@
             });
         }
 
-        // SIMPAN PERUBAHAN KEHADIRAN KE SUPABASE
         btnSavePeserta.addEventListener('click', async () => {
             if (!currentTouringId) {
                 alert('ID Touring tidak ditemukan.');
@@ -534,33 +523,36 @@
                 });
                 newParticipantMap[nra] = selectedVal;
                 upsertPayloads.push({
-                    touring_id: currentTouringId,
-                    nra: nra,
+                    touring_id: Number(currentTouringId),
+                    nra: String(nra),
                     status: selectedVal
                 });
             });
 
             try {
-                // Hapus data lama untuk touring ini lalu masukkan yang baru
-                await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
-                const { error } = await db.from('touring_participants').insert(upsertPayloads);
-                
-                if (error) throw error;
+                // Hapus data lama berdasarkan touring_id
+                const { error: delError } = await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
+                if (delError) throw delError;
+
+                // Masukkan data baru jika ada
+                if (upsertPayloads.length > 0) {
+                    const { error: insError } = await db.from('touring_participants').insert(upsertPayloads);
+                    if (insError) throw insError;
+                }
 
                 participantMap = newParticipantMap;
                 updateParticipantCount();
                 closeModal();
                 alert('Kehadiran peserta berhasil disimpan!');
             } catch (err) {
-                console.error('Gagal menyimpan:', err.message);
-                alert('Gagal menyimpan data kehadiran ke database.');
+                console.error('Gagal menyimpan:', err);
+                alert('Gagal: ' + (err.message || JSON.stringify(err)));
             } finally {
                 btnSavePeserta.innerText = 'Simpan Kehadiran';
                 btnSavePeserta.disabled = false;
             }
         });
 
-        // 3. AMBIL DATA DARI SUPABASE
         async function fetchKasData() {
             try {
                 let { data: membersData } = await db.from('members').select('*');
