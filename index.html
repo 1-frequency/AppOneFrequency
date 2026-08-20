@@ -117,7 +117,6 @@
                     <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
                 </div>
                 
-                <!-- Panel Filter Lengkap (Sesi, Bulan, Tahun, Status) -->
                 <div class="flex flex-wrap items-center gap-2">
                     <select id="filter-sesi" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
                         <option value="semua">Semua Sesi</option>
@@ -186,7 +185,7 @@
             <div class="flex justify-between items-center border-b border-gray-800 pb-3">
                 <div>
                     <h3 class="text-lg font-bold text-white">Checklist Kehadiran Peserta</h3>
-                    <p class="text-xs text-gray-400">Pilih status keikutsertaan member untuk agenda touring ini.</p>
+                    <p class="text-xs text-gray-400">Default otomatis Ikut. Jika Tidak, wajib isi alasan.</p>
                 </div>
                 <button id="btn-close-modal" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
             </div>
@@ -206,14 +205,15 @@
     <script>
     document.addEventListener("DOMContentLoaded", () => {
         const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6InBhbm9uIiwiaWF0IjoxNzg3MDg3MzY2LCJleHAiOjIxMDI2NjMzNjZ9.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
 
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let globalMembers = [];
         let globalTransactions = [];
         let currentTouringId = null;
-        let participantMap = {}; // Penyimpan status nra -> 'ikut' / 'tidak'
+        let participantMap = {};
+        let reasonMap = {};
         let currentStatusFilter = 'semua';
 
         const formatRupiah = (angka) => {
@@ -269,16 +269,16 @@
             document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
         }
 
-        // HITUNG JUMLAH PESERTA IKUT
         function updateParticipantCount() {
             let count = 0;
-            Object.values(participantMap).forEach(status => {
+            globalMembers.forEach(m => {
+                const nra = m.nra;
+                const status = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut'; // Default ikut
                 if (status === 'ikut') count++;
             });
             document.getElementById('count-peserta').innerText = count;
         }
 
-        // 1. AMBIL DATA TOURING & PESERTA
         async function fetchTouringData() {
             try {
                 const { data, error } = await db
@@ -308,16 +308,11 @@
                         const selisihHari = Math.ceil(selisihWaktu / (1000 * 60 * 60 * 24));
                         
                         const countdownEl = document.getElementById('touring-countdown');
-                        if (selisihHari > 0) {
-                            countdownEl.innerText = `${selisihHari} Hari Lagi`;
-                        } else if (selisihHari === 0) {
-                            countdownEl.innerText = 'Hari Ini!';
-                        } else {
-                            countdownEl.innerText = 'Sudah Lewat';
-                        }
+                        if (selisihHari > 0) countdownEl.innerText = `${selisihHari} Hari Lagi`;
+                        else if (selisihHari === 0) countdownEl.innerText = 'Hari Ini!';
+                        else countdownEl.innerText = 'Sudah Lewat';
                     }
 
-                    // Ambil data partisipan dari database
                     fetchParticipants();
                 } else {
                     document.getElementById('touring-name').innerText = "Belum Ada Jadwal";
@@ -338,8 +333,10 @@
 
                 if (!error && data) {
                     participantMap = {};
+                    reasonMap = {};
                     data.forEach(p => {
                         participantMap[p.nra] = p.status;
+                        reasonMap[p.nra] = p.alasan || '';
                     });
                     updateParticipantCount();
                 }
@@ -348,7 +345,6 @@
             }
         }
 
-        // 2. RENDER TABEL KAS
         function renderKasTable(data) {
             const tableBody = document.getElementById('kas-table-body');
             tableBody.innerHTML = ''; 
@@ -360,8 +356,8 @@
 
             data.forEach(row => {
                 const statusBadge = row.status_final === 'LUNAS 100%' 
-                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20 shadow-sm">LUNAS</span>` 
-                    : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/20 shadow-sm">BELUM</span>`;
+                    ? `<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/25 shadow-sm">LUNAS</span>` 
+                    : `<span class="bg-rose-500/10 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-500/25 shadow-sm">BELUM</span>`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
@@ -432,7 +428,6 @@
             renderKasTable(processedData);
         }
 
-        // EVENT LISTENERS FILTER
         document.getElementById('filter-sesi').addEventListener('change', processAndFilterData);
         document.getElementById('filter-bulan').addEventListener('change', processAndFilterData);
         document.getElementById('filter-tahun').addEventListener('change', processAndFilterData);
@@ -456,7 +451,6 @@
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
 
-        // MODAL LOGIC
         const modal = document.getElementById('modal-peserta');
         const btnOpenModal = document.getElementById('btn-open-modal');
         const btnCloseModal = document.getElementById('btn-close-modal');
@@ -487,31 +481,50 @@
             globalMembers.forEach(m => {
                 const nra = m.nra || '-';
                 const nama = m.nama_lengkap || m.name || 'Member';
-                const currentStatus = participantMap[nra] || 'tidak'; // default tidak ikut
+                const currentStatus = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut'; // Default ikut
+                const currentAlasan = reasonMap[nra] || '';
 
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between py-2.5 px-2 hover:bg-gray-800/40 rounded-xl transition-colors";
+                div.className = "flex flex-col py-3 px-2 hover:bg-gray-800/40 rounded-xl transition-colors space-y-2";
+                
                 div.innerHTML = `
-                    <div>
-                        <p class="font-bold text-sm text-white">${nama}</p>
-                        <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-sm text-white">${nama}</p>
+                            <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="part_${nra}" value="ikut" ${currentStatus === 'ikut' ? 'checked' : ''} class="peer sr-only radio-ikut" data-nra="${nra}">
+                                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition-all block">Ikut</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="part_${nra}" value="tidak" ${currentStatus === 'tidak' ? 'checked' : ''} class="peer sr-only radio-tidak" data-nra="${nra}">
+                                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition-all block">Tidak</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="part_${nra}" value="ikut" ${currentStatus === 'ikut' ? 'checked' : ''} class="peer sr-only">
-                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition-all block">Ikut</span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="part_${nra}" value="tidak" ${currentStatus === 'tidak' ? 'checked' : ''} class="peer sr-only">
-                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition-all block">Tidak</span>
-                        </label>
+                    <div id="wrapper_alasan_${nra}" class="${currentStatus === 'tidak' ? '' : 'hidden'}">
+                        <input type="text" id="alasan_${nra}" value="${currentAlasan}" placeholder="Tuliskan alasan tidak ikut..." class="w-full bg-gray-950 border border-gray-700 text-xs rounded-xl px-3 py-2 text-gray-200 focus:outline-none focus:border-rose-500">
                     </div>
                 `;
                 modalMemberList.appendChild(div);
             });
+
+            // Event listener untuk memunculkan kolom alasan secara dinamis
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const nra = e.target.getAttribute('data-nra');
+                    const wrapper = document.getElementById(`wrapper_alasan_${nra}`);
+                    if (e.target.value === 'tidak') {
+                        wrapper.classList.remove('hidden');
+                    } else {
+                        wrapper.classList.add('hidden');
+                    }
+                });
+            });
         }
 
-        // SIMPAN PERUBAHAN KEHADIRAN KE SUPABASE
         btnSavePeserta.addEventListener('click', async () => {
             if (!currentTouringId) {
                 alert('ID Touring tidak ditemukan.');
@@ -522,45 +535,59 @@
             btnSavePeserta.disabled = true;
 
             let newParticipantMap = {};
+            let newReasonMap = {};
             let upsertPayloads = [];
 
             globalMembers.forEach(m => {
                 const nra = m.nra;
                 if (!nra) return;
+                
                 const radios = document.querySelectorAll(`input[name="part_${nra}"]`);
-                let selectedVal = 'tidak';
+                let selectedVal = 'ikut'; // Default jika belum diapa-apakan
                 radios.forEach(r => {
                     if (r.checked) selectedVal = r.value;
                 });
+
+                let alasanVal = null;
+                if (selectedVal === 'tidak') {
+                    const inputAlasan = document.getElementById(`alasan_${nra}`);
+                    alasanVal = inputAlasan ? inputAlasan.value.trim() : '';
+                }
+
                 newParticipantMap[nra] = selectedVal;
+                newReasonMap[nra] = alasanVal;
+
                 upsertPayloads.push({
                     touring_id: currentTouringId,
-                    nra: nra,
-                    status: selectedVal
+                    nra: String(nra),
+                    status: selectedVal,
+                    alasan: alasanVal
                 });
             });
 
             try {
-                // Hapus data lama untuk touring ini lalu masukkan yang baru
-                await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
-                const { error } = await db.from('touring_participants').insert(upsertPayloads);
-                
-                if (error) throw error;
+                const { error: delError } = await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
+                if (delError) throw delError;
+
+                if (upsertPayloads.length > 0) {
+                    const { error: insError } = await db.from('touring_participants').insert(upsertPayloads);
+                    if (insError) throw insError;
+                }
 
                 participantMap = newParticipantMap;
+                reasonMap = newReasonMap;
                 updateParticipantCount();
                 closeModal();
                 alert('Kehadiran peserta berhasil disimpan!');
             } catch (err) {
-                console.error('Gagal menyimpan:', err.message);
-                alert('Gagal menyimpan data kehadiran ke database.');
+                console.error('Gagal menyimpan:', err);
+                alert('Gagal: ' + (err.message || JSON.stringify(err)));
             } finally {
                 btnSavePeserta.innerText = 'Simpan Kehadiran';
                 btnSavePeserta.disabled = false;
             }
         });
 
-        // 3. AMBIL DATA DARI SUPABASE
         async function fetchKasData() {
             try {
                 let { data: membersData } = await db.from('members').select('*');
