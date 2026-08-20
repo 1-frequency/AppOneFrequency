@@ -7,7 +7,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b0f19] bg-[url('1.Frequensi.jpg')] bg-cover bg-center bg-no-repeat text-white font-sans antialiased flex items-center justify-center min-h-screen relative">
+<body class="bg-[#0b0f19] text-white font-sans antialiased flex items-center justify-center min-h-screen relative" style="background-image: url('1.Frequensi.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
 
     <!-- Dark Overlay agar teks tetap jelas terbaca -->
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
@@ -57,7 +57,7 @@
 
     <!-- JavaScript untuk Interaksi -->
     <script>
-        const correctPassword = "admin123"; // Ganti password admin di sini jika perlu
+        const correctPassword = "admin123"; // Ganti password admin jika perlu
 
         function loginAsMember() {
             window.location.href = "dashboard.html"; 
