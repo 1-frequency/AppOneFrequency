@@ -117,14 +117,12 @@
                     <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
                 </div>
                 
-                <!-- Tombol Toggle Tampil/Sembunyi Rekap Kas -->
                 <button id="btn-toggle-rekap" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
                     <span id="text-toggle-rekap">Lihat Rekap Kas</span>
                     <svg id="icon-chevron" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
             </div>
 
-            <!-- Konten Rekap Kas (Hidden Default) -->
             <div id="content-rekap-kas" class="space-y-4 hidden">
                 <div class="flex flex-wrap items-center justify-end gap-2">
                     <select id="filter-sesi" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
@@ -164,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Glassmorphism -->
                 <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
@@ -186,18 +183,46 @@
             </div>
         </section>
 
-        <!-- SECTION 3: DAFTAR PESERTA TOURING (BARU) -->
-        <section class="space-y-4 pt-2">
+        <!-- SECTION 3: DAFTAR PESERTA TOURING (DIPERBARUI MENJADI TABEL TOGGLE) -->
+        <section class="space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-7 bg-amber-500 rounded-full"></div>
                     <h3 class="text-xl font-bold tracking-tight text-white">Daftar Peserta Touring</h3>
                 </div>
                 
-                <button id="btn-open-daftar-peserta" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
-                    <span>Lihat Daftar Peserta</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                <button id="btn-toggle-daftar" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
+                    <span id="text-toggle-daftar">Lihat Daftar Peserta</span>
+                    <svg id="icon-chevron-daftar" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
+            </div>
+
+            <div id="content-daftar-peserta" class="space-y-4 hidden">
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    <div class="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs font-semibold shadow-inner">
+                        <button id="btn-p-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
+                        <button id="btn-p-ikut" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Ikut</button>
+                        <button id="btn-p-tidak" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Tidak</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
+                            <tr>
+                                <th class="p-4 font-semibold">Member</th>
+                                <th class="p-4 font-semibold">NRA</th>
+                                <th class="p-4 text-center font-semibold">Status Kehadiran</th>
+                                <th class="p-4 font-semibold">Alasan (Jika Tidak)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daftar-peserta-table-body" class="divide-y divide-gray-800/60">
+                            <tr>
+                                <td colspan="4" class="p-8 text-center text-gray-500 italic">Memuat data peserta...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -225,27 +250,6 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP LIHAT DAFTAR PESERTA (BARU) -->
-    <div id="modal-daftar-peserta" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-lg p-6 space-y-4 shadow-2xl m-4 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <div>
-                    <h3 class="text-lg font-bold text-white">Rekapitulasi Peserta Touring</h3>
-                    <p class="text-xs text-gray-400">Daftar lengkap member yang ikut serta dan alasan bagi yang tidak.</p>
-                </div>
-                <button id="btn-close-daftar-modal" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
-            </div>
-            
-            <div id="modal-daftar-list" class="overflow-y-auto space-y-3 flex-1 pr-1 divide-y divide-gray-800/40">
-                <p class="text-center text-gray-500 text-xs py-4">Memuat data peserta...</p>
-            </div>
-
-            <div class="border-t border-gray-800 pt-3 flex justify-end">
-                <button id="btn-ok-daftar-modal" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md">Tutup</button>
-            </div>
-        </div>
-    </div>
-
     <!-- SCRIPT KONEKSI SUPABASE & LOGIKA -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -260,6 +264,7 @@
         let participantMap = {}; 
         let reasonMap = {}; 
         let currentStatusFilter = 'semua';
+        let currentParticipantFilter = 'semua';
 
         // Logika Toggle Rekap Kas
         const btnToggleRekap = document.getElementById('btn-toggle-rekap');
@@ -274,58 +279,21 @@
             iconChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
         });
 
-        // Logika Modal Pop-up Daftar Peserta (Baru)
-        const modalDaftarPeserta = document.getElementById('modal-daftar-peserta');
-        const btnOpenDaftarPeserta = document.getElementById('btn-open-daftar-peserta');
-        const btnCloseDaftarModal = document.getElementById('btn-close-daftar-modal');
-        const btnOkDaftarModal = document.getElementById('btn-ok-daftar-modal');
-        const modalDaftarList = document.getElementById('modal-daftar-list');
+        // Logika Toggle Daftar Peserta
+        const btnToggleDaftar = document.getElementById('btn-toggle-daftar');
+        const contentDaftar = document.getElementById('content-daftar-peserta');
+        const textToggleDaftar = document.getElementById('text-toggle-daftar');
+        const iconChevronDaftar = document.getElementById('icon-chevron-daftar');
 
-        function openDaftarModal() {
-            modalDaftarPeserta.classList.remove('hidden');
-            renderDaftarListContent();
-        }
-
-        function closeDaftarModal() {
-            modalDaftarPeserta.classList.add('hidden');
-        }
-
-        btnOpenDaftarPeserta.addEventListener('click', openDaftarModal);
-        btnCloseDaftarModal.addEventListener('click', closeDaftarModal);
-        btnOkDaftarModal.addEventListener('click', closeDaftarModal);
-
-        function renderDaftarListContent() {
-            modalDaftarList.innerHTML = '';
-            if (!globalMembers || globalMembers.length === 0) {
-                modalDaftarList.innerHTML = '<p class="text-center text-gray-500 text-xs py-4">Tidak ada data member.</p>';
-                return;
+        btnToggleDaftar.addEventListener('click', () => {
+            contentDaftar.classList.toggle('hidden');
+            const isHidden = contentDaftar.classList.contains('hidden');
+            textToggleDaftar.innerText = isHidden ? 'Lihat Daftar Peserta' : 'Tutup Daftar Peserta';
+            iconChevronDaftar.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            if (!isHidden) {
+                renderDaftarPesertaTable();
             }
-
-            globalMembers.forEach(m => {
-                const nra = m.nra || '-';
-                const nama = m.nama_lengkap || m.name || 'Member';
-                const status = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut';
-                const alasan = reasonMap[nra] || '-';
-
-                const statusBadge = status === 'ikut'
-                    ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold">IKUT</span>`
-                    : `<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg text-xs font-bold">TIDAK</span>`;
-
-                const div = document.createElement('div');
-                div.className = "flex flex-col py-2.5 px-2 hover:bg-gray-800/40 rounded-xl transition-colors space-y-1";
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="font-bold text-sm text-white">${nama}</p>
-                            <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
-                        </div>
-                        <div>${statusBadge}</div>
-                    </div>
-                    ${status === 'tidak' ? `<p class="text-xs text-rose-300 bg-rose-950/30 px-2.5 py-1.5 rounded-lg border border-rose-900/40">Alasan: ${alasan}</p>` : ''}
-                `;
-                modalDaftarList.appendChild(div);
-            });
-        }
+        });
 
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
@@ -454,6 +422,9 @@
                         reasonMap[p.nra] = p.alasan || '';
                     });
                     updateParticipantCount();
+                    if (!contentDaftar.classList.contains('hidden')) {
+                        renderDaftarPesertaTable();
+                    }
                 }
             } catch (e) {
                 console.log('Tabel touring_participants belum ada atau kosong.');
@@ -482,6 +453,50 @@
                     <td class="p-4 text-center text-gray-300 font-medium">${row.sesi_str}</td>
                     <td class="p-4 text-right font-mono font-semibold text-orange-400">${formatRupiah(row.total_kas_terbayar)}</td>
                     <td class="p-4 text-center">${statusBadge}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function renderDaftarPesertaTable() {
+            const tableBody = document.getElementById('daftar-peserta-table-body');
+            tableBody.innerHTML = '';
+
+            if (!globalMembers || globalMembers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500 italic">Tidak ada data peserta.</td></tr>';
+                return;
+            }
+
+            let filteredMembers = globalMembers.filter(m => {
+                const nra = m.nra;
+                const status = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut';
+                if (currentParticipantFilter === 'ikut' && status !== 'ikut') return false;
+                if (currentParticipantFilter === 'tidak' && status !== 'tidak') return false;
+                return true;
+            });
+
+            if (filteredMembers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500 italic">Tidak ada data yang sesuai dengan filter.</td></tr>';
+                return;
+            }
+
+            filteredMembers.forEach(m => {
+                const nra = m.nra || '-';
+                const nama = m.nama_lengkap || m.name || 'Member';
+                const status = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut';
+                const alasan = reasonMap[nra] || '-';
+
+                const statusBadge = status === 'ikut'
+                    ? `<span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold">IKUT</span>`
+                    : `<span class="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-bold">TIDAK</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition-colors duration-150";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-gray-100">${nama}</td>
+                    <td class="p-4 text-gray-400 font-mono">${nra}</td>
+                    <td class="p-4 text-center">${statusBadge}</td>
+                    <td class="p-4 text-gray-300 text-xs">${status === 'tidak' ? alasan : '-'}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -565,6 +580,26 @@
         btnSemua.addEventListener('click', () => setStatusFilter('semua'));
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
+
+        // Sub-filter Daftar Peserta
+        const btnPSemua = document.getElementById('btn-p-semua');
+        const btnPIkut = document.getElementById('btn-p-ikut');
+        const btnPTidak = document.getElementById('btn-p-tidak');
+
+        function setParticipantFilter(type) {
+            currentParticipantFilter = type;
+            [btnPSemua, btnPIkut, btnPTidak].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200";
+            });
+            if (type === 'ikut') btnPIkut.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else if (type === 'tidak') btnPTidak.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else btnPSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            renderDaftarPesertaTable();
+        }
+
+        btnPSemua.addEventListener('click', () => setParticipantFilter('semua'));
+        btnPIkut.addEventListener('click', () => setParticipantFilter('ikut'));
+        btnPTidak.addEventListener('click', () => setParticipantFilter('tidak'));
 
         // MODAL CHECKLIST KEHADIRAN LOGIC
         const modal = document.getElementById('modal-peserta');
@@ -689,6 +724,9 @@
                 participantMap = newParticipantMap;
                 reasonMap = newReasonMap;
                 updateParticipantCount();
+                if (!contentDaftar.classList.contains('hidden')) {
+                    renderDaftarPesertaTable();
+                }
                 closeModal();
                 alert('Kehadiran peserta berhasil disimpan!');
             } catch (err) {
