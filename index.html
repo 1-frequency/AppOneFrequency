@@ -109,16 +109,24 @@
             </div>
         </section>
 
-        <!-- SECTION 2: REKAP KAS MEMBER -->
+        <!-- SECTION 2: REKAP KAS MEMBER (Dibuat dengan Tombol Toggle agar Clean) -->
         <section class="space-y-4">
-            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-7 bg-orange-500 rounded-full"></div>
                     <h3 class="text-xl font-bold tracking-tight text-white">Rekap Kas Member (4 Sesi)</h3>
                 </div>
                 
-                <!-- Panel Filter Lengkap (Sesi, Bulan, Tahun, Status) -->
-                <div class="flex flex-wrap items-center gap-2">
+                <!-- Tombol Toggle Tampil/Sembunyi Rekap Kas -->
+                <button id="btn-toggle-rekap" class="bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-semibold px-4 py-2.5 rounded-xl border border-gray-800 transition-all flex items-center space-x-2 shadow-sm">
+                    <span id="text-toggle-rekap">Lihat Rekap Kas</span>
+                    <svg id="icon-chevron" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+            </div>
+
+            <!-- Konten Rekap Kas (Hidden Default) -->
+            <div id="content-rekap-kas" class="space-y-4 hidden">
+                <div class="flex flex-wrap items-center justify-end gap-2">
                     <select id="filter-sesi" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
                         <option value="semua">Semua Sesi</option>
                         <option value="1">Sesi 1</option>
@@ -155,26 +163,26 @@
                         <button id="btn-filter-lunas" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Lunas</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tabel Glassmorphism -->
-            <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
-                <table class="w-full text-left text-sm whitespace-nowrap">
-                    <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
-                        <tr>
-                            <th class="p-4 font-semibold">Member</th>
-                            <th class="p-4 font-semibold">NRA</th>
-                            <th class="p-4 text-center font-semibold">Sesi</th>
-                            <th class="p-4 text-right font-semibold">Total Kas</th>
-                            <th class="p-4 text-center font-semibold">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kas-table-body" class="divide-y divide-gray-800/60">
-                        <tr>
-                            <td colspan="5" class="p-8 text-center text-gray-500 italic">Memuat data kas member...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- Tabel Glassmorphism -->
+                <div class="overflow-x-auto glass-card rounded-2xl border border-gray-800 shadow-xl">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-gray-900/60 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-800">
+                            <tr>
+                                <th class="p-4 font-semibold">Member</th>
+                                <th class="p-4 font-semibold">NRA</th>
+                                <th class="p-4 text-center font-semibold">Sesi</th>
+                                <th class="p-4 text-right font-semibold">Total Kas</th>
+                                <th class="p-4 text-center font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kas-table-body" class="divide-y divide-gray-800/60">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-500 italic">Memuat data kas member...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -186,7 +194,7 @@
             <div class="flex justify-between items-center border-b border-gray-800 pb-3">
                 <div>
                     <h3 class="text-lg font-bold text-white">Checklist Kehadiran Peserta</h3>
-                    <p class="text-xs text-gray-400">Pilih status keikutsertaan member untuk agenda touring ini.</p>
+                    <p class="text-xs text-gray-400">Default otomatis ikut. Jika tidak, isi alasan pada kolom yang tersedia.</p>
                 </div>
                 <button id="btn-close-modal" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
             </div>
@@ -214,7 +222,21 @@
         let globalTransactions = [];
         let currentTouringId = null;
         let participantMap = {}; // Penyimpan status nra -> 'ikut' / 'tidak'
+        let reasonMap = {}; // Penyimpan alasan nra -> text
         let currentStatusFilter = 'semua';
+
+        // Logika Toggle Rekap Kas
+        const btnToggleRekap = document.getElementById('btn-toggle-rekap');
+        const contentRekap = document.getElementById('content-rekap-kas');
+        const textToggleRekap = document.getElementById('text-toggle-rekap');
+        const iconChevron = document.getElementById('icon-chevron');
+
+        btnToggleRekap.addEventListener('click', () => {
+            contentRekap.classList.toggle('hidden');
+            const isHidden = contentRekap.classList.contains('hidden');
+            textToggleRekap.innerText = isHidden ? 'Lihat Rekap Kas' : 'Tutup Rekap Kas';
+            iconChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
 
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
@@ -269,10 +291,12 @@
             document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
         }
 
-        // HITUNG JUMLAH PESERTA IKUT
+        // HITUNG JUMLAH PESERTA IKUT (Default ikut jika belum di-set)
         function updateParticipantCount() {
             let count = 0;
-            Object.values(participantMap).forEach(status => {
+            globalMembers.forEach(m => {
+                const nra = m.nra;
+                const status = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut';
                 if (status === 'ikut') count++;
             });
             document.getElementById('count-peserta').innerText = count;
@@ -317,7 +341,6 @@
                         }
                     }
 
-                    // Ambil data partisipan dari database
                     fetchParticipants();
                 } else {
                     document.getElementById('touring-name').innerText = "Belum Ada Jadwal";
@@ -338,8 +361,10 @@
 
                 if (!error && data) {
                     participantMap = {};
+                    reasonMap = {};
                     data.forEach(p => {
                         participantMap[p.nra] = p.status;
+                        reasonMap[p.nra] = p.alasan || '';
                     });
                     updateParticipantCount();
                 }
@@ -487,27 +512,48 @@
             globalMembers.forEach(m => {
                 const nra = m.nra || '-';
                 const nama = m.nama_lengkap || m.name || 'Member';
-                const currentStatus = participantMap[nra] || 'tidak'; // default tidak ikut
+                const currentStatus = participantMap[nra] !== undefined ? participantMap[nra] : 'ikut'; // Default ikut
+                const currentAlasan = reasonMap[nra] || '';
 
                 const div = document.createElement('div');
-                div.className = "flex items-center justify-between py-2.5 px-2 hover:bg-gray-800/40 rounded-xl transition-colors";
+                div.className = "flex flex-col py-3 px-2 hover:bg-gray-800/40 rounded-xl transition-colors space-y-2";
                 div.innerHTML = `
-                    <div>
-                        <p class="font-bold text-sm text-white">${nama}</p>
-                        <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-sm text-white">${nama}</p>
+                            <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="part_${nra}" value="ikut" ${currentStatus === 'ikut' ? 'checked' : ''} class="peer sr-only" data-nra="${nra}">
+                                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition-all block">Ikut</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="part_${nra}" value="tidak" ${currentStatus === 'tidak' ? 'checked' : ''} class="peer sr-only" data-nra="${nra}">
+                                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition-all block">Tidak</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="part_${nra}" value="ikut" ${currentStatus === 'ikut' ? 'checked' : ''} class="peer sr-only">
-                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition-all block">Ikut</span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="part_${nra}" value="tidak" ${currentStatus === 'tidak' ? 'checked' : ''} class="peer sr-only">
-                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition-all block">Tidak</span>
-                        </label>
+                    <div id="wrapper_alasan_${nra}" class="${currentStatus === 'tidak' ? '' : 'hidden'}">
+                        <input type="text" id="alasan_${nra}" value="${currentAlasan}" placeholder="Tuliskan alasan tidak ikut..." class="w-full bg-gray-950 border border-gray-700 text-xs rounded-xl px-3 py-2 text-gray-200 focus:outline-none focus:border-rose-500">
                     </div>
                 `;
                 modalMemberList.appendChild(div);
+            });
+
+            // Event listener radio button untuk memunculkan kolom alasan secara dinamis
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const nra = e.target.getAttribute('data-nra');
+                    const wrapper = document.getElementById(`wrapper_alasan_${nra}`);
+                    if (wrapper) {
+                        if (e.target.value === 'tidak') {
+                            wrapper.classList.remove('hidden');
+                        } else {
+                            wrapper.classList.add('hidden');
+                        }
+                    }
+                });
             });
         }
 
@@ -522,21 +568,32 @@
             btnSavePeserta.disabled = true;
 
             let newParticipantMap = {};
+            let newReasonMap = {};
             let upsertPayloads = [];
 
             globalMembers.forEach(m => {
                 const nra = m.nra;
                 if (!nra) return;
                 const radios = document.querySelectorAll(`input[name="part_${nra}"]`);
-                let selectedVal = 'tidak';
+                let selectedVal = 'ikut'; // Default ikut
                 radios.forEach(r => {
                     if (r.checked) selectedVal = r.value;
                 });
+
+                let alasanVal = null;
+                if (selectedVal === 'tidak') {
+                    const inputAlasan = document.getElementById(`alasan_${nra}`);
+                    alasanVal = inputAlasan ? inputAlasan.value.trim() : '';
+                }
+
                 newParticipantMap[nra] = selectedVal;
+                newReasonMap[nra] = alasanVal;
+
                 upsertPayloads.push({
                     touring_id: currentTouringId,
                     nra: nra,
-                    status: selectedVal
+                    status: selectedVal,
+                    alasan: alasanVal
                 });
             });
 
@@ -548,6 +605,7 @@
                 if (error) throw error;
 
                 participantMap = newParticipantMap;
+                reasonMap = newReasonMap;
                 updateParticipantCount();
                 closeModal();
                 alert('Kehadiran peserta berhasil disimpan!');
