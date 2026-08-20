@@ -84,9 +84,16 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
-                <span class="text-xs text-gray-400 font-medium">Target Budget Kas Terkumpul</span>
-                <span class="font-black text-lg text-emerald-400" id="touring-budget">Rp 0</span>
+            <!-- Informasi Saldo Saat Ini & Target Budget -->
+            <div class="pt-4 border-t border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <div class="flex justify-between sm:justify-start sm:space-x-6 items-center">
+                    <span class="text-xs text-gray-400 font-medium">Saldo Saat Ini:</span>
+                    <span class="font-black text-lg text-cyan-400" id="saldo-saat-ini">Rp 0</span>
+                </div>
+                <div class="flex justify-between sm:justify-end sm:space-x-6 items-center">
+                    <span class="text-xs text-gray-400 font-medium">Target Budget:</span>
+                    <span class="font-black text-lg text-emerald-400" id="touring-budget">Rp 0</span>
+                </div>
             </div>
         </section>
 
@@ -181,7 +188,7 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         };
 
-        // Fungsi Helper untuk Parsing Sesi, Bulan, Tahun, Nama, & NRA dari Supabase (Category & Description)
+        // Fungsi Helper Parsing Transaksi
         function parseTransaction(tx) {
             let sesi = '';
             let bulan = '';
@@ -189,15 +196,12 @@
             let nama = '';
             let nra = '';
 
-            // 1. Ambil Sesi dari kolom 'category' (misal: "SESI 3" -> "3")
             if (tx.category) {
                 const matchSesi = String(tx.category).match(/\d+/);
                 if (matchSesi) sesi = matchSesi[0];
             }
 
-            // 2. Ambil dari kolom 'description' (format: "Bulan: 2026-08 | Sahrul (NRA: 0203)")
             if (tx.description) {
-                // Ekstrak Bulan & Tahun ("2026-08")
                 const matchBulan = tx.description.match(/Bulan:\s*([0-9]{4}-[0-9]{2})/i);
                 if (matchBulan) {
                     bulan = matchBulan[1]; 
@@ -205,20 +209,17 @@
                     tahun = parts[0];
                 }
 
-                // Ekstrak NRA ("0203")
                 const matchNra = tx.description.match(/NRA:\s*([^)]+)/i);
                 if (matchNra) {
                     nra = matchNra[1].trim();
                 }
 
-                // Ekstrak Nama ("Sahrul")
                 const matchNama = tx.description.match(/\|\s*([^|(]+)(?:\(NRA:|$)/i);
                 if (matchNama) {
                     nama = matchNama[1].trim();
                 }
             }
 
-            // Fallback ke created_at jika bulan tidak ditemukan di description
             if (!bulan && tx.created_at) {
                 const d = new Date(tx.created_at);
                 if (!isNaN(d)) {
@@ -236,6 +237,22 @@
                 parsed_nra: nra,
                 parsed_month_num: bulan ? String(parseInt(bulan.split('-')[1], 10)) : ''
             };
+        }
+
+        // Hitung & Update Saldo Saat Ini
+        function updateSaldoSaatIni() {
+            let totalSaldo = 0;
+            globalTransactions.forEach(tx => {
+                const amount = parseFloat(tx.amount || 0);
+                const type = String(tx.type || '').toLowerCase();
+                
+                if (type === 'keluar' || type === 'expense' || type === 'pengeluaran') {
+                    totalSaldo -= amount;
+                } else {
+                    totalSaldo += amount; // 'masuk' atau default pemasukan
+                }
+            });
+            document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
         }
 
         // 1. AMBIL DATA TOURING
@@ -321,26 +338,21 @@
             const filterBulan = document.getElementById('filter-bulan').value;
             const filterTahun = document.getElementById('filter-tahun').value;
 
-            // Parse dan filter transaksi sesuai struktur database
             const parsedTxList = globalTransactions.map(tx => parseTransaction(tx));
 
             const filteredTx = parsedTxList.filter(tx => {
-                // Cek Sesi
                 if (filterSesi !== 'semua' && tx.parsed_sesi !== filterSesi) {
                     return false;
                 }
-                // Cek Bulan
                 if (filterBulan !== 'semua' && tx.parsed_month_num !== filterBulan) {
                     return false;
                 }
-                // Cek Tahun
                 if (filterTahun !== 'semua' && tx.parsed_tahun !== filterTahun) {
                     return false;
                 }
                 return true;
             });
 
-            // Map ke rekap member
             let processedData = globalMembers.map(member => {
                 const memberNra = String(member.nra || '').trim();
                 const memberName = String(member.nama_lengkap || member.name || member.member_name || '').toLowerCase();
@@ -377,7 +389,6 @@
                 };
             });
 
-            // Filter Status (Semua / Belum / Lunas)
             if (currentStatusFilter === 'belum') {
                 processedData = processedData.filter(row => row.status_final !== 'LUNAS 100%');
             } else if (currentStatusFilter === 'lunas') {
@@ -426,7 +437,9 @@
 
                 globalTransactions = transactions || [];
 
-                // Gabungkan member dari tabel members dan data transaksi (parsed dari description)
+                // Hitung saldo saat ini otomatis dari transaksi
+                updateSaldoSaatIni();
+
                 let memberMap = {};
                 if (membersData && membersData.length > 0) {
                     membersData.forEach(m => {
