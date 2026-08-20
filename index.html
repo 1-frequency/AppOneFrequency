@@ -84,15 +84,27 @@
                 </div>
             </div>
 
-            <!-- Informasi Saldo Saat Ini & Target Budget -->
-            <div class="pt-4 border-t border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <div class="flex justify-between sm:justify-start sm:space-x-6 items-center">
-                    <span class="text-xs text-gray-400 font-medium">Saldo Saat Ini:</span>
-                    <span class="font-black text-lg text-cyan-400" id="saldo-saat-ini">Rp 0</span>
+            <!-- Informasi Keuangan & Tombol Daftar Peserta -->
+            <div class="pt-4 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex flex-wrap items-center gap-6 w-full sm:w-auto">
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium">Saldo Saat Ini:</span>
+                        <span class="font-black text-base text-cyan-400 ml-1" id="saldo-saat-ini">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium">Target Budget:</span>
+                        <span class="font-black text-base text-emerald-400 ml-1" id="touring-budget">Rp 0</span>
+                    </div>
                 </div>
-                <div class="flex justify-between sm:justify-end sm:space-x-6 items-center">
-                    <span class="text-xs text-gray-400 font-medium">Target Budget:</span>
-                    <span class="font-black text-lg text-emerald-400" id="touring-budget">Rp 0</span>
+                
+                <div class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="text-xs text-gray-300">
+                        Peserta Ikut: <span id="count-peserta" class="font-black text-orange-400 text-base">0</span> Orang
+                    </div>
+                    <button id="btn-open-modal" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg flex items-center space-x-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Daftar Peserta</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -107,7 +119,6 @@
                 
                 <!-- Panel Filter Lengkap (Sesi, Bulan, Tahun, Status) -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Dropdown Filter Sesi -->
                     <select id="filter-sesi" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
                         <option value="semua">Semua Sesi</option>
                         <option value="1">Sesi 1</option>
@@ -116,7 +127,6 @@
                         <option value="4">Sesi 4</option>
                     </select>
 
-                    <!-- Dropdown Filter Bulan -->
                     <select id="filter-bulan" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
                         <option value="semua">Semua Bulan</option>
                         <option value="1">Januari</option>
@@ -133,14 +143,12 @@
                         <option value="12">Desember</option>
                     </select>
 
-                    <!-- Dropdown Filter Tahun -->
                     <select id="filter-tahun" class="bg-gray-900 border border-gray-800 text-gray-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-500 font-medium">
                         <option value="semua">Semua Tahun</option>
                         <option value="2026">2026</option>
                         <option value="2025">2025</option>
                     </select>
 
-                    <!-- Filter Status Pills -->
                     <div class="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs font-semibold shadow-inner">
                         <button id="btn-filter-semua" class="px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200">Semua</button>
                         <button id="btn-filter-belum" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200">Belum</button>
@@ -172,6 +180,28 @@
 
     </main>
 
+    <!-- MODAL CHECKLIST DAFTAR PESERTA -->
+    <div id="modal-peserta" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-lg p-6 space-y-4 shadow-2xl m-4 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Checklist Kehadiran Peserta</h3>
+                    <p class="text-xs text-gray-400">Pilih status keikutsertaan member untuk agenda touring ini.</p>
+                </div>
+                <button id="btn-close-modal" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            
+            <div id="modal-member-list" class="overflow-y-auto space-y-3 flex-1 pr-1 divide-y divide-gray-800/40">
+                <p class="text-center text-gray-500 text-xs py-4">Memuat daftar member...</p>
+            </div>
+
+            <div class="border-t border-gray-800 pt-3 flex justify-end space-x-3">
+                <button id="btn-cancel-modal" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-semibold transition-all">Batal</button>
+                <button id="btn-save-peserta" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md">Simpan Kehadiran</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT KONEKSI SUPABASE & LOGIKA -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -182,44 +212,31 @@
 
         let globalMembers = [];
         let globalTransactions = [];
-        let currentStatusFilter = 'semua'; // 'semua', 'belum', 'lunas'
+        let currentTouringId = null;
+        let participantMap = {}; // Penyimpan status nra -> 'ikut' / 'tidak'
+        let currentStatusFilter = 'semua';
 
         const formatRupiah = (angka) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         };
 
-        // Fungsi Helper Parsing Transaksi
         function parseTransaction(tx) {
-            let sesi = '';
-            let bulan = '';
-            let tahun = '';
-            let nama = '';
-            let nra = '';
-
+            let sesi = '', bulan = '', tahun = '', nama = '', nra = '';
             if (tx.category) {
                 const matchSesi = String(tx.category).match(/\d+/);
                 if (matchSesi) sesi = matchSesi[0];
             }
-
             if (tx.description) {
                 const matchBulan = tx.description.match(/Bulan:\s*([0-9]{4}-[0-9]{2})/i);
                 if (matchBulan) {
                     bulan = matchBulan[1]; 
-                    const parts = bulan.split('-');
-                    tahun = parts[0];
+                    tahun = bulan.split('-')[0];
                 }
-
                 const matchNra = tx.description.match(/NRA:\s*([^)]+)/i);
-                if (matchNra) {
-                    nra = matchNra[1].trim();
-                }
-
+                if (matchNra) nra = matchNra[1].trim();
                 const matchNama = tx.description.match(/\|\s*([^|(]+)(?:\(NRA:|$)/i);
-                if (matchNama) {
-                    nama = matchNama[1].trim();
-                }
+                if (matchNama) nama = matchNama[1].trim();
             }
-
             if (!bulan && tx.created_at) {
                 const d = new Date(tx.created_at);
                 if (!isNaN(d)) {
@@ -227,7 +244,6 @@
                     tahun = String(d.getFullYear());
                 }
             }
-
             return {
                 ...tx,
                 parsed_sesi: sesi,
@@ -239,23 +255,30 @@
             };
         }
 
-        // Hitung & Update Saldo Saat Ini
         function updateSaldoSaatIni() {
             let totalSaldo = 0;
             globalTransactions.forEach(tx => {
                 const amount = parseFloat(tx.amount || 0);
                 const type = String(tx.type || '').toLowerCase();
-                
                 if (type === 'keluar' || type === 'expense' || type === 'pengeluaran') {
                     totalSaldo -= amount;
                 } else {
-                    totalSaldo += amount; // 'masuk' atau default pemasukan
+                    totalSaldo += amount;
                 }
             });
             document.getElementById('saldo-saat-ini').innerText = formatRupiah(totalSaldo);
         }
 
-        // 1. AMBIL DATA TOURING
+        // HITUNG JUMLAH PESERTA IKUT
+        function updateParticipantCount() {
+            let count = 0;
+            Object.values(participantMap).forEach(status => {
+                if (status === 'ikut') count++;
+            });
+            document.getElementById('count-peserta').innerText = count;
+        }
+
+        // 1. AMBIL DATA TOURING & PESERTA
         async function fetchTouringData() {
             try {
                 const { data, error } = await db
@@ -268,6 +291,7 @@
 
                 if (data && data.length > 0) {
                     const touring = data[0];
+                    currentTouringId = touring.id;
                     document.getElementById('touring-name').innerText = touring.nama_acara || 'Touring Plan';
                     document.getElementById('touring-dest').innerText = touring.tujuan || '-';
                     document.getElementById('touring-budget').innerText = formatRupiah(touring.target_budget);
@@ -292,15 +316,35 @@
                             countdownEl.innerText = 'Sudah Lewat';
                         }
                     }
+
+                    // Ambil data partisipan dari database
+                    fetchParticipants();
                 } else {
                     document.getElementById('touring-name').innerText = "Belum Ada Jadwal";
                     document.getElementById('touring-dest').innerText = "Belum ditentukan";
-                    document.getElementById('touring-date').innerText = "-";
-                    document.getElementById('touring-countdown').innerText = "0 Hari";
                 }
             } catch (err) {
                 console.log('Error ambil touring:', err.message);
-                document.getElementById('touring-name').innerText = "Gagal Memuat Jadwal";
+            }
+        }
+
+        async function fetchParticipants() {
+            if (!currentTouringId) return;
+            try {
+                const { data, error } = await db
+                    .from('touring_participants')
+                    .select('*')
+                    .eq('touring_id', currentTouringId);
+
+                if (!error && data) {
+                    participantMap = {};
+                    data.forEach(p => {
+                        participantMap[p.nra] = p.status;
+                    });
+                    updateParticipantCount();
+                }
+            } catch (e) {
+                console.log('Tabel touring_participants belum ada atau kosong.');
             }
         }
 
@@ -332,7 +376,6 @@
             });
         }
 
-        // 3. FUNGSI UTAMA PROSES & FILTER DATA
         function processAndFilterData() {
             const filterSesi = document.getElementById('filter-sesi').value;
             const filterBulan = document.getElementById('filter-bulan').value;
@@ -341,21 +384,15 @@
             const parsedTxList = globalTransactions.map(tx => parseTransaction(tx));
 
             const filteredTx = parsedTxList.filter(tx => {
-                if (filterSesi !== 'semua' && tx.parsed_sesi !== filterSesi) {
-                    return false;
-                }
-                if (filterBulan !== 'semua' && tx.parsed_month_num !== filterBulan) {
-                    return false;
-                }
-                if (filterTahun !== 'semua' && tx.parsed_tahun !== filterTahun) {
-                    return false;
-                }
+                if (filterSesi !== 'semua' && tx.parsed_sesi !== filterSesi) return false;
+                if (filterBulan !== 'semua' && tx.parsed_month_num !== filterBulan) return false;
+                if (filterTahun !== 'semua' && tx.parsed_tahun !== filterTahun) return false;
                 return true;
             });
 
             let processedData = globalMembers.map(member => {
                 const memberNra = String(member.nra || '').trim();
-                const memberName = String(member.nama_lengkap || member.name || member.member_name || '').toLowerCase();
+                const memberName = String(member.nama_lengkap || member.name || '').toLowerCase();
 
                 const memberTx = filteredTx.filter(tx => {
                     const txNra = tx.parsed_nra;
@@ -369,15 +406,12 @@
                 memberTx.forEach(tx => {
                     const sesi = tx.parsed_sesi;
                     const jumlah = parseFloat(tx.amount || 0);
-                    if (jumlah > 0 && sesi) {
-                        paidSessionsSet.add(`Sesi ${sesi}`);
-                    }
+                    if (jumlah > 0 && sesi) paidSessionsSet.add(`Sesi ${sesi}`);
                     totalKas += jumlah;
                 });
 
                 const paidSessionsArr = Array.from(paidSessionsSet).sort();
                 const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
-                
                 const isLunas = filterSesi !== 'semua' ? paidSessionsArr.length > 0 : paidSessionsArr.length >= 4;
 
                 return {
@@ -398,7 +432,7 @@
             renderKasTable(processedData);
         }
 
-        // 4. EVENT LISTENERS FILTER
+        // EVENT LISTENERS FILTER
         document.getElementById('filter-sesi').addEventListener('change', processAndFilterData);
         document.getElementById('filter-bulan').addEventListener('change', processAndFilterData);
         document.getElementById('filter-tahun').addEventListener('change', processAndFilterData);
@@ -412,15 +446,9 @@
             [btnSemua, btnBelum, btnLunas].forEach(btn => {
                 btn.className = "px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all duration-200";
             });
-
-            if (type === 'belum') {
-                btnBelum.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            } else if (type === 'lunas') {
-                btnLunas.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            } else {
-                btnSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
-            }
-
+            if (type === 'belum') btnBelum.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else if (type === 'lunas') btnLunas.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
+            else btnSemua.className = "px-3 py-1.5 rounded-lg bg-orange-600 text-white shadow-md transition-all duration-200";
             processAndFilterData();
         }
 
@@ -428,16 +456,118 @@
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
 
-        // 5. AMBIL DATA DARI SUPABASE & GABUNGKAN
+        // MODAL LOGIC
+        const modal = document.getElementById('modal-peserta');
+        const btnOpenModal = document.getElementById('btn-open-modal');
+        const btnCloseModal = document.getElementById('btn-close-modal');
+        const btnCancelModal = document.getElementById('btn-cancel-modal');
+        const btnSavePeserta = document.getElementById('btn-save-peserta');
+        const modalMemberList = document.getElementById('modal-member-list');
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            renderModalMemberList();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        btnOpenModal.addEventListener('click', openModal);
+        btnCloseModal.addEventListener('click', closeModal);
+        btnCancelModal.addEventListener('click', closeModal);
+
+        function renderModalMemberList() {
+            modalMemberList.innerHTML = '';
+            if (!globalMembers || globalMembers.length === 0) {
+                modalMemberList.innerHTML = '<p class="text-center text-gray-500 text-xs py-4">Tidak ada data member.</p>';
+                return;
+            }
+
+            globalMembers.forEach(m => {
+                const nra = m.nra || '-';
+                const nama = m.nama_lengkap || m.name || 'Member';
+                const currentStatus = participantMap[nra] || 'tidak'; // default tidak ikut
+
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between py-2.5 px-2 hover:bg-gray-800/40 rounded-xl transition-colors";
+                div.innerHTML = `
+                    <div>
+                        <p class="font-bold text-sm text-white">${nama}</p>
+                        <p class="text-xs text-gray-400 font-mono">NRA: ${nra}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="part_${nra}" value="ikut" ${currentStatus === 'ikut' ? 'checked' : ''} class="peer sr-only">
+                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition-all block">Ikut</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="part_${nra}" value="tidak" ${currentStatus === 'tidak' ? 'checked' : ''} class="peer sr-only">
+                            <span class="px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 bg-gray-800 text-gray-400 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition-all block">Tidak</span>
+                        </label>
+                    </div>
+                `;
+                modalMemberList.appendChild(div);
+            });
+        }
+
+        // SIMPAN PERUBAHAN KEHADIRAN KE SUPABASE
+        btnSavePeserta.addEventListener('click', async () => {
+            if (!currentTouringId) {
+                alert('ID Touring tidak ditemukan.');
+                return;
+            }
+
+            btnSavePeserta.innerText = 'Menyimpan...';
+            btnSavePeserta.disabled = true;
+
+            let newParticipantMap = {};
+            let upsertPayloads = [];
+
+            globalMembers.forEach(m => {
+                const nra = m.nra;
+                if (!nra) return;
+                const radios = document.querySelectorAll(`input[name="part_${nra}"]`);
+                let selectedVal = 'tidak';
+                radios.forEach(r => {
+                    if (r.checked) selectedVal = r.value;
+                });
+                newParticipantMap[nra] = selectedVal;
+                upsertPayloads.push({
+                    touring_id: currentTouringId,
+                    nra: nra,
+                    status: selectedVal
+                });
+            });
+
+            try {
+                // Hapus data lama untuk touring ini lalu masukkan yang baru
+                await db.from('touring_participants').delete().eq('touring_id', currentTouringId);
+                const { error } = await db.from('touring_participants').insert(upsertPayloads);
+                
+                if (error) throw error;
+
+                participantMap = newParticipantMap;
+                updateParticipantCount();
+                closeModal();
+                alert('Kehadiran peserta berhasil disimpan!');
+            } catch (err) {
+                console.error('Gagal menyimpan:', err.message);
+                alert('Gagal menyimpan data kehadiran ke database.');
+            } finally {
+                btnSavePeserta.innerText = 'Simpan Kehadiran';
+                btnSavePeserta.disabled = false;
+            }
+        });
+
+        // 3. AMBIL DATA DARI SUPABASE
         async function fetchKasData() {
             try {
-                let { data: membersData, error: membersError } = await db.from('members').select('*');
+                let { data: membersData } = await db.from('members').select('*');
                 const { data: transactions, error: txError } = await db.from('transactions').select('*');
                 if (txError) throw txError;
 
                 globalTransactions = transactions || [];
-
-                // Hitung saldo saat ini otomatis dari transaksi
                 updateSaldoSaatIni();
 
                 let memberMap = {};
@@ -460,11 +590,9 @@
                 });
 
                 globalMembers = Object.values(memberMap);
-
                 processAndFilterData();
             } catch (err) {
                 console.error("Error mengambil rekap kas: ", err.message);
-                document.getElementById('kas-table-body').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 italic">Gagal memuat data kas. Periksa koneksi atau database Anda.</td></tr>`;
             }
         }
 
