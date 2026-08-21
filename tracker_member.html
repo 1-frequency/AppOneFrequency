@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Tracking Member - OneFrequency</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    #map { height: 80vh; width: 100%; border-radius: 0.5rem; }
+  </style>
+</head>
+<body class="bg-gray-100 p-4">
+
+  <!-- Header / Status untuk Member -->
+  <div class="max-w-md mx-auto bg-white p-4 rounded-xl shadow-md mb-4 text-center">
+    <h1 class="text-xl font-bold text-gray-800">Pantau Posisi Konvoi</h1>
+    <p id="status-text" class="text-sm text-blue-600 font-medium mt-1">Menghubungkan ke Road Captain...</p>
+    
+    <!-- Kotak pilihan cadangan jika dibuka tanpa parameter URL -->
+    <div id="selection-box" class="mt-3 hidden">
+      <select id="touring-select" class="w-full p-2 border rounded-lg text-sm mb-2">
+        <option value="">-- Pilih Jadwal Touring --</option>
+      </select>
+      <button id="view-btn" class="w-full bg-blue-600 text-white p-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition">
+        Mulai Pantau
+      </button>
+    </div>
+  </div>
+
+  <!-- Peta Khusus Member -->
+  <div class="max-w-4xl mx-auto bg-white p-2 rounded-xl shadow-md">
+    <div id="map"></div>
+  </div>
+
+  <!-- Supabase & Leaflet JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // --- KONFIGURASI SUPABASE ---
+    const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+    
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Cek apakah link dikirim dengan parameter touring_id dari admin
+    const urlParams = new URLSearchParams(window.location.search);
+    const touringId = urlParams.get('touring_id');
+
+    const statusText = document.getElementById('status-text');
+    const selectionBox = document.getElementById('selection-box');
+    const touringSelect = document.getElementById('touring-select');
+    const viewBtn = document.getElementById('view-btn');
+
+    // Inisialisasi Peta Leaflet
+    const map = L.map('map').setView([-6.2000, 106.8166], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+
+    // Logika Otomatis Berdasarkan URL
+    if (touringId) {
+      statusText.innerText = "Memantau posisi Road Captain secara live...";
+      startTracking(touringId);
+    } else {
+      statusText.innerText = "Silakan pilih jadwal touring di bawah:";
+      selectionBox.classList.remove('hidden');
+      loadTouringPlans();
+    }
+
+    // Fungsi ambil daftar touring jika dibuka manual
+    async function loadTouringPlans() {
+      const { data } = await supabaseClient.from('touring_plans').select('*');
+      if (data && data.length > 0) {
+        data.forEach(tour => {
+          const opt = document.createElement('option');
+          opt.value = tour.id;
+          opt.textContent = tour.name || tour.title || `Touring ID: ${tour.id.substring(0, 8)}`;
+          touringSelect.appendChild(opt);
+        });
+      } else {
+        touringSelect.innerHTML = '<option value="">Tidak ada jadwal touring</option>';
+      }
+    }
+
+    viewBtn.addEventListener('click', () => {
+      const selectedId = touringSelect.value;
+      if (!selectedId) {
+        alert('Pilih jadwal touring terlebih dahulu!');
+        return;
+      }
+      selectionBox.classList.add('hidden');
+      statusText.innerText = "Memantau posisi Road Captain...";
+      startTracking(selectedId);
+    });
+
+    // Fungsi Utama Tracking untuk Member
+    async function startTracking(id) {
+      // 1. Ambil posisi awal (jika Road Captain sudah jalan)
+      const { data } = await supabaseClient
+        .from('touring_locations')
+        .select('*')
+        .eq('touring_id', id)
+        .single();
+
+      if (data) {
+        updateMarker(data.latitude, data.longitude);
+      } else {
+        statusText.innerText = "Menunggu Road Captain membagikan lokasi...";
+      }
+
+      // 2. Dengarkan perubahan lokasi secara Real-time
+      supabaseClient
+        .channel('public:touring_locations')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'touring_locations',
+            filter: `touring_id=eq.${id}`
+          },
+          (payload) => {
+            const { latitude, longitude } = payload.new;
+            updateMarker(latitude, longitude);
+          }
+        )
+        .subscribe();
+    }
+
+    function updateMarker(lat, lng) {
+      if (!marker) {
+        marker = L.marker([lat, lng]).addTo(map).bindPopup('<b>Road Captain (Konvoi)</b>').openPopup();
+      } else {
+        marker.setLatLng([lat, lng]);
+      }
+      map.panTo([lat, lng]);
+    }
+  </script>
+</body>
+</html>
