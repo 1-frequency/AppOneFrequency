@@ -60,7 +60,9 @@
     // --- KONFIGURASI SUPABASE ---
     const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Menggunakan nama variabel 'supabaseClient' agar tidak bentrok
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Cek apakah ada touring_id di URL (dikirim dari admin.html)
     const urlParams = new URLSearchParams(window.location.search);
@@ -70,7 +72,7 @@
 
     // Inisialisasi Peta Leaflet
     const map = L.map('map').setView([-6.2000, 106.8166], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/**{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
@@ -83,7 +85,7 @@
     const statusInfo = document.getElementById('status-info');
     const statusText = document.getElementById('status-text');
 
-    // Jika ID dari URL ada, sembunyikan pilihan jadwal dan langsung siap pakai!
+    // Jika ID dari URL ada, sembunyikan pilihan jadwal
     if (touringIdFromURL) {
       touringSelect.parentElement.style.display = 'none';
     } else {
@@ -91,7 +93,7 @@
     }
 
     async function loadTouringPlans() {
-      const { data, error } = await supabase.from('touring_plans').select('*');
+      const { data, error } = await supabaseClient.from('touring_plans').select('*');
       touringSelect.innerHTML = '';
       if (error) {
         touringSelect.innerHTML = '<option value="">Gagal memuat jadwal</option>';
@@ -145,7 +147,7 @@
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
 
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('touring_locations')
             .upsert({
               touring_id: touringId,
@@ -168,7 +170,7 @@
     function initMember(touringId) {
       fetchInitialLocation(touringId);
 
-      supabase
+      supabaseClient
         .channel('public:touring_locations')
         .on(
           'postgres_changes',
@@ -187,7 +189,7 @@
     }
 
     async function fetchInitialLocation(touringId) {
-      const { data } = await supabase
+      const { data } = await supabaseClient
         .from('touring_locations')
         .select('*')
         .eq('touring_id', touringId)
