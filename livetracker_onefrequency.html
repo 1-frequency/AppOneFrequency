@@ -58,15 +58,19 @@
 
   <script>
     // --- KONFIGURASI SUPABASE ---
-    const SUPABASE_URL = 'MASUKKAN_SUPABASE_URL_ANDA';
-    const SUPABASE_ANON_KEY = 'MASUKKAN_SUPABASE_ANON_KEY_ANDA';
+    const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let selectedTouringId = null;
+    // Cek apakah ada touring_id di URL (dikirim dari admin.html)
+    const urlParams = new URLSearchParams(window.location.search);
+    const touringIdFromURL = urlParams.get('touring_id');
+
+    let selectedTouringId = touringIdFromURL;
 
     // Inisialisasi Peta Leaflet
     const map = L.map('map').setView([-6.2000, 106.8166], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/**{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
@@ -79,41 +83,40 @@
     const statusInfo = document.getElementById('status-info');
     const statusText = document.getElementById('status-text');
 
-    // 1. Ambil daftar touring dari tabel touring_plans saat halaman dibuka
+    // Jika ID dari URL ada, sembunyikan pilihan jadwal dan langsung siap pakai!
+    if (touringIdFromURL) {
+      touringSelect.parentElement.style.display = 'none';
+    } else {
+      loadTouringPlans();
+    }
+
     async function loadTouringPlans() {
-      const { data, error } = await supabase
-        .from('touring_plans')
-        .select('*'); // Ambil semua kolom touring plans
-
+      const { data, error } = await supabase.from('touring_plans').select('*');
       touringSelect.innerHTML = '';
-
       if (error) {
-        console.error('Gagal memuat data touring:', error.message);
         touringSelect.innerHTML = '<option value="">Gagal memuat jadwal</option>';
         return;
       }
-
       if (data && data.length > 0) {
         touringSelect.innerHTML = '<option value="">-- Pilih Jadwal Touring --</option>';
         data.forEach(tour => {
           const opt = document.createElement('option');
           opt.value = tour.id;
-          // Menampilkan nama/judul touring (Sesuaikan nama kolom jika di database Anda berbeda, misal: tour.name atau tour.title)
           opt.textContent = tour.name || tour.title || `Touring ID: ${tour.id.substring(0, 8)}...`;
           touringSelect.appendChild(opt);
         });
       } else {
-        touringSelect.innerHTML = '<option value="">Tidak ada jadwal touring tersedia</option>';
+        touringSelect.innerHTML = '<option value="">Tidak ada jadwal touring</option>';
       }
     }
 
-    loadTouringPlans();
-
     startBtn.addEventListener('click', () => {
-      selectedTouringId = touringSelect.value;
+      if (!selectedTouringId) {
+        selectedTouringId = touringSelect.value;
+      }
       
       if (!selectedTouringId) {
-        alert('Silakan pilih jadwal touring terlebih dahulu!');
+        alert('Jadwal touring belum ditentukan atau dipilih!');
         return;
       }
 
@@ -130,7 +133,7 @@
       }
     });
 
-    // 2. Fungsi untuk Road Captain (Mengirim GPS)
+    // 1. Fungsi untuk Road Captain (Mengirim GPS)
     function initRoadCaptain(touringId) {
       if (!navigator.geolocation) {
         alert('Browser Anda tidak mendukung Geolocation.');
@@ -152,20 +155,16 @@
               updated_at: new Date()
             }, { onConflict: 'touring_id' });
 
-          if (error) {
-            console.error('Gagal kirim lokasi:', error.message);
-          } else {
+          if (!error) {
             updateMapMarker(lat, lng, '<b>Posisi Anda (Road Captain)</b>');
           }
         },
-        (error) => {
-          alert('Gagal mengambil GPS: ' + error.message);
-        },
+        (error) => alert('Gagal mengambil GPS: ' + error.message),
         { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
       );
     }
 
-    // 3. Fungsi untuk Member (Menerima Realtime Data)
+    // 2. Fungsi untuk Member (Menerima Realtime Data)
     function initMember(touringId) {
       fetchInitialLocation(touringId);
 
@@ -188,7 +187,7 @@
     }
 
     async function fetchInitialLocation(touringId) {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('touring_locations')
         .select('*')
         .eq('touring_id', touringId)
