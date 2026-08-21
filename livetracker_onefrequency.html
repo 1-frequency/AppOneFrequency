@@ -41,9 +41,14 @@
       </button>
     </div>
 
-    <!-- Info Status -->
-    <div id="status-info" class="hidden text-sm text-center text-green-600 font-medium mt-2">
-      Status: <span id="status-text">Menunggu...</span>
+    <!-- Info Status & Tombol Stop -->
+    <div id="status-info" class="hidden text-center space-y-3 mt-2">
+      <div class="text-sm text-green-600 font-medium">
+        Status: <span id="status-text">Menunggu...</span>
+      </div>
+      <button id="stop-btn" class="w-full bg-red-600 text-white p-2 rounded-lg font-semibold hover:bg-red-700 transition">
+        Berhenti Tracking
+      </button>
     </div>
   </div>
 
@@ -61,14 +66,13 @@
     const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
     
-    // Menggunakan nama variabel 'supabaseClient' agar tidak bentrok
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Cek apakah ada touring_id di URL (dikirim dari admin.html)
     const urlParams = new URLSearchParams(window.location.search);
     const touringIdFromURL = urlParams.get('touring_id');
 
     let selectedTouringId = touringIdFromURL;
+    let watchId = null; // Menyimpan ID geolocation watch agar bisa di-stop
 
     // Inisialisasi Peta Leaflet
     const map = L.map('map').setView([-6.2000, 106.8166], 13);
@@ -79,13 +83,13 @@
 
     let marker = null;
     const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
     const roleSelect = document.getElementById('role-select');
     const touringSelect = document.getElementById('touring-select');
     const setupPanel = document.getElementById('setup-panel');
     const statusInfo = document.getElementById('status-info');
     const statusText = document.getElementById('status-text');
 
-    // Jika ID dari URL ada, sembunyikan pilihan jadwal
     if (touringIdFromURL) {
       touringSelect.parentElement.style.display = 'none';
     } else {
@@ -135,6 +139,20 @@
       }
     });
 
+    // Tombol Berhenti Tracking
+    stopBtn.addEventListener('click', () => {
+      // Hentikan pengiriman GPS jika aktif
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      // Putuskan koneksi realtime supabase
+      supabaseClient.removeAllChannels();
+
+      alert('Tracking dihentikan.');
+      window.location.reload(); // Muat ulang halaman ke kondisi awal
+    });
+
     // 1. Fungsi untuk Road Captain (Mengirim GPS)
     function initRoadCaptain(touringId) {
       if (!navigator.geolocation) {
@@ -142,7 +160,7 @@
         return;
       }
 
-      navigator.geolocation.watchPosition(
+      watchId = navigator.geolocation.watchPosition(
         async (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
@@ -162,7 +180,7 @@
           }
         },
         (error) => alert('Gagal mengambil GPS: ' + error.message),
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
       );
     }
 
