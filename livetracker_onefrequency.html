@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Tracking Touring - OneFrequency</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    #map { height: 75vh; width: 100%; border-radius: 0.5rem; }
+  </style>
+</head>
+<body class="bg-gray-100 p-4">
+
+  <div class="max-w-md mx-auto bg-white p-4 rounded-xl shadow-md mb-4">
+    <h1 class="text-xl font-bold text-center mb-2 text-gray-800">Live Tracking Touring</h1>
+    
+    <!-- Pilihan Mode -->
+    <div id="setup-panel" class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Pilih Peran Anda:</label>
+        <select id="role-select" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+          <option value="member">Anggota (Hanya Pantau Peta)</option>
+          <option value="rc">Road Captain (Kirim Lokasi GPS)</option>
+        </select>
+      </div>
+      <button id="start-btn" class="w-full bg-blue-600 text-white p-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+        Mulai
+      </button>
+    </div>
+
+    <!-- Info Status -->
+    <div id="status-info" class="hidden text-sm text-center text-green-600 font-medium mt-2">
+      Status: <span id="status-text">Menunggu...</span>
+    </div>
+  </div>
+
+  <!-- Peta -->
+  <div class="max-w-4xl mx-auto bg-white p-2 rounded-xl shadow-md">
+    <div id="map"></div>
+  </div>
+
+  <!-- Supabase & Leaflet JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // --- KONFIGURASI SUPABASE ---
+    // Ganti dengan URL dan Anon Key dari Project Supabase Anda
+    const SUPABASE_URL = 'https://phpjaseuurpguhtzdvwy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGphc2V1dXJwZ3VodHpkdnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwODczNjYsImV4cCI6MjEwMjY2MzM2Nn0.DZvN_2ze96tgV3OuTWXpawe_g2YGWU7JWVJAfiQede4';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ID Touring aktif (Ambil UUID dari tabel touring_plans di database Anda)
+    const TOURING_ID = 'MASUKKAN_UUID_TOURING_ID_ANDA';
+
+    // Inisialisasi Peta Leaflet (Pusat awal di Indonesia)
+    const map = L.map('map').setView([-6.2000, 106.8166], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = null;
+    const startBtn = document.getElementById('start-btn');
+    const roleSelect = document.getElementById('role-select');
+    const setupPanel = document.getElementById('setup-panel');
+    const statusInfo = document.getElementById('status-info');
+    const statusText = document.getElementById('status-text');
+
+    startBtn.addEventListener('click', () => {
+      const role = roleSelect.value;
+      setupPanel.classList.add('hidden');
+      statusInfo.classList.remove('hidden');
+
+      if (role === 'rc') {
+        statusText.innerText = 'Mengirim Lokasi (Road Captain)...';
+        initRoadCaptain();
+      } else {
+        statusText.innerText = 'Memantau Posisi Road Captain...';
+        initMember();
+      }
+    });
+
+    // 1. Fungsi untuk Road Captain (Mengirim GPS)
+    function initRoadCaptain() {
+      if (!navigator.geolocation) {
+        alert('Browser Anda tidak mendukung Geolocation.');
+        return;
+      }
+
+      navigator.geolocation.watchPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const { error } = await supabase
+            .from('touring_locations')
+            .upsert({
+              touring_id: TOURING_ID,
+              nra: 'RC-001',
+              latitude: lat,
+              longitude: lng,
+              updated_at: new Date()
+            }, { onConflict: 'touring_id' });
+
+          if (error) {
+            console.error('Gagal kirim lokasi:', error.message);
+          } else {
+            updateMapMarker(lat, lng, '<b>Posisi Anda (Road Captain)</b>');
+          }
+        },
+        (error) => {
+          alert('Gagal mengambil GPS: ' + error.message);
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+      );
+    }
+
+    // 2. Fungsi untuk Member (Menerima Realtime Data)
+    function initMember() {
+      fetchInitialLocation();
+
+      supabase
+        .channel('public:touring_locations')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'touring_locations',
+            filter: `touring_id=eq.${TOURING_ID}`
+          },
+          (payload) => {
+            const { latitude, longitude } = payload.new;
+            updateMapMarker(latitude, longitude, '<b>Road Captain (Bergerak)</b>');
+          }
+        )
+        .subscribe();
+    }
+
+    async function fetchInitialLocation() {
+      const { data, error } = await supabase
+        .from('touring_locations')
+        .select('*')
+        .eq('touring_id', TOURING_ID)
+        .single();
+
+      if (data) {
+        updateMapMarker(data.latitude, data.longitude, '<b>Road Captain</b>');
+      }
+    }
+
+    function updateMapMarker(lat, lng, popupText) {
+      if (!marker) {
+        marker = L.marker([lat, lng]).addTo(map).bindPopup(popupText).openPopup();
+      } else {
+        marker.setLatLng([lat, lng]);
+        marker.setPopupContent(popupText);
+      }
+      map.panTo([lat, lng]);
+    }
+  </script>
+</body>
+</html>
