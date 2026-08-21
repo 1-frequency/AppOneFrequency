@@ -717,7 +717,7 @@
 
                 const paidSessionsArr = Array.from(paidSessionsSet).sort();
                 const sesiStr = paidSessionsArr.length > 0 ? paidSessionsArr.join(', ') : '-';
-                const isLunas = filterSesi !== 'semua' ? paidSessionsArr.length > 0 : paidSessionsArr.length >= 4;
+                const isLunas = paidSessionsArr.length > 0;
 
                 return {
                     nama_lengkap: member.nama_lengkap || member.name || 'Member',
