@@ -324,6 +324,22 @@
         </div>
     </div>
 
+    <!-- CUSTOM NOTIFICATION MODAL -->
+    <div id="custom-notification" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm hidden">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl m-4">
+            <div id="notif-icon-container" class="w-12 h-12 mx-auto rounded-full flex items-center justify-center bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                <svg id="notif-svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <h3 id="notif-title" class="text-base font-bold text-white mb-1">Pemberitahuan</h3>
+                <p id="notif-message" class="text-xs text-gray-300 leading-relaxed">-</p>
+            </div>
+            <button id="notif-btn-ok" class="w-full py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-semibold transition-all shadow-md">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
     <!-- SCRIPT KONEKSI SUPABASE & LOGIKA -->
     <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -340,6 +356,32 @@
         let currentStatusFilter = 'semua';
         let currentParticipantFilter = 'semua';
         let currentTransactionFilter = 'semua';
+
+        // Fungsi Custom Notification Modern
+        function showCustomNotification(title, message, isError = false) {
+            const notifModal = document.getElementById('custom-notification');
+            const notifTitle = document.getElementById('notif-title');
+            const notifMsg = document.getElementById('notif-message');
+            const iconContainer = document.getElementById('notif-icon-container');
+            const notifSvg = document.getElementById('notif-svg');
+
+            notifTitle.innerText = title;
+            notifMsg.innerText = message;
+
+            if (isError) {
+                iconContainer.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                notifSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>';
+            } else {
+                iconContainer.className = "w-12 h-12 mx-auto rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                notifSvg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+            }
+
+            notifModal.classList.remove('hidden');
+        }
+
+        document.getElementById('notif-btn-ok').addEventListener('click', () => {
+            document.getElementById('custom-notification').classList.add('hidden');
+        });
 
         // Logika Toggle Rekap Kas
         const btnToggleRekap = document.getElementById('btn-toggle-rekap');
@@ -466,7 +508,6 @@
                 return true;
             });
 
-            // Urutkan berdasarkan tanggal terbaru
             filteredTx.sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
 
             if (filteredTx.length === 0) {
@@ -507,7 +548,6 @@
             });
         }
 
-        // Filter Tombol Riwayat Transaksi
         const btnTrxSemua = document.getElementById('btn-trx-semua');
         const btnTrxMasuk = document.getElementById('btn-trx-masuk');
         const btnTrxKeluar = document.getElementById('btn-trx-keluar');
@@ -760,7 +800,6 @@
         btnBelum.addEventListener('click', () => setStatusFilter('belum'));
         btnLunas.addEventListener('click', () => setStatusFilter('lunas'));
 
-        // Sub-filter Daftar Peserta
         const btnPSemua = document.getElementById('btn-p-semua');
         const btnPIkut = document.getElementById('btn-p-ikut');
         const btnPTidak = document.getElementById('btn-p-tidak');
@@ -859,7 +898,7 @@
 
         btnSavePeserta.addEventListener('click', async () => {
             if (!currentTouringId) {
-                alert('ID Touring tidak ditemukan.');
+                showCustomNotification('Perhatian', 'ID Touring tidak ditemukan.', true);
                 return;
             }
 
@@ -900,7 +939,7 @@
             });
 
             if (hasError) {
-                alert(errorMessage);
+                showCustomNotification('Perhatian', errorMessage, true);
                 return;
             }
 
@@ -920,10 +959,10 @@
                     renderDaftarPesertaTable();
                 }
                 closeModal();
-                alert('Kehadiran peserta berhasil disimpan!');
+                showCustomNotification('Berhasil', 'Kehadiran peserta berhasil disimpan!', false);
             } catch (err) {
                 console.error('Gagal menyimpan:', err.message);
-                alert('Gagal menyimpan data kehadiran ke database.');
+                showCustomNotification('Gagal', 'Gagal menyimpan data kehadiran ke database.', true);
             } finally {
                 btnSavePeserta.innerText = 'Simpan Kehadiran';
                 btnSavePeserta.disabled = false;
