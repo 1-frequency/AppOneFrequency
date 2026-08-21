@@ -38,7 +38,7 @@
                 <h1 class="text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
                     MEMBER <span class="text-white">TRACKER</span>
                 </h1>
-                <p class="text-xs text-gray-400 font-medium">Pantau Posisi & Hubungan Jarak ke Road Captain</p>
+                <p class="text-xs text-gray-400 font-medium">Pantau Jejak Rute Konvoi Road Captain</p>
             </div>
             <a href="index.html" class="text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-xl transition-all border border-gray-700">
                 &larr; Kembali ke Dashboard
@@ -53,10 +53,10 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-                        Mode Koneksi Konvoi
+                        Mode Jejak Rute Konvoi
                     </span>
-                    <h2 class="text-xl font-black mt-2 text-white">Live Tracking & Garis Hubung</h2>
-                    <p class="text-xs text-gray-400 mt-1">Pilih jadwal touring untuk menghubungkan posisi Anda dengan Road Captain.</p>
+                    <h2 class="text-xl font-black mt-2 text-white">Live Tracking & Rekam Jalur</h2>
+                    <p class="text-xs text-gray-400 mt-1">Pilih jadwal touring untuk mulai merekam dan memantau jalur rute Road Captain.</p>
                 </div>
 
                 <div class="w-full sm:w-auto">
@@ -75,7 +75,7 @@
 
                 <button id="btn-toggle-watch" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    <span id="btn-text">Mulai Hubungkan</span>
+                    <span id="btn-text">Mulai Pantau & Rekam Rute</span>
                 </button>
             </div>
         </div>
@@ -114,11 +114,9 @@
         let map;
         let memberMarker = null;
         let captainMarker = null;
-        let connectionLine = null;
+        let captainRouteLine = null;
+        let captainPathCoords = []; // Array untuk merekam jejak jalur Road Captain
 
-        let memberCoords = null;
-        let captainCoords = null;
-        
         let watchInterval = null;
         let memberWatchId = null;
         let isWatching = false;
@@ -156,11 +154,10 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Garis biru penghubung antara Member dan Captain
-            connectionLine = L.polyline([], {
-                color: '#2563eb', // Biru terang
-                weight: 4,
-                dashArray: '6, 8', // Efek garis putus-putus elegan ala navigasi
+            // Garis jalur perjalanan Road Captain (mengikuti jalan yang dilewati)
+            captainRouteLine = L.polyline([], {
+                color: '#2563eb', // Warna Biru Terang
+                weight: 5,
                 opacity: 0.85
             }).addTo(map);
         }
@@ -195,14 +192,7 @@
 
         fetchTouringSchedules();
 
-        // Fungsi Memperbarui Garis Penghubung di Peta
-        function updateConnectionLine() {
-            if (memberCoords && captainCoords) {
-                connectionLine.setLatLngs([memberCoords, captainCoords]);
-            }
-        }
-
-        // Ambil Posisi Road Captain dari Supabase
+        // Ambil Posisi Road Captain dan Rekam Jejak Jalurnya
         async function fetchCaptainLocation(touringId) {
             try {
                 const { data, error } = await db
@@ -214,8 +204,16 @@
                 if (error) throw error;
 
                 if (data && data.latitude && data.longitude) {
-                    captainCoords = [data.latitude, data.longitude];
+                    const captainCoords = [data.latitude, data.longitude];
 
+                    // Tambahkan titik koordinat baru ke riwayat jalur jika ada perpindahan posisi
+                    const lastPoint = captainPathCoords[captainPathCoords.length - 1];
+                    if (!lastPoint || lastPoint[0] !== captainCoords[0] || lastPoint[1] !== captainCoords[1]) {
+                        captainPathCoords.push(captainCoords);
+                        captainRouteLine.setLatLngs(captainPathCoords); // Perbarui garis biru di peta
+                    }
+
+                    // Perbarui atau buat marker posisi Road Captain
                     if (!captainMarker) {
                         captainMarker = L.marker(captainCoords, {
                             icon: L.divIcon({
@@ -227,15 +225,13 @@
                     } else {
                         captainMarker.setLatLng(captainCoords);
                     }
-
-                    updateConnectionLine();
                 }
             } catch (err) {
                 console.log("Menunggu sinyal Road Captain...");
             }
         }
 
-        // Tombol Mulai/Berhenti Pantau & Hubungkan
+        // Tombol Mulai/Berhenti Pantau
         const btnToggle = document.getElementById('btn-toggle-watch');
         const btnText = document.getElementById('btn-text');
         const statusIndicator = document.getElementById('status-indicator');
@@ -256,16 +252,19 @@
                 }
 
                 isWatching = true;
-                btnText.innerText = 'Putuskan Koneksi';
+                captainPathCoords = []; // Reset jejak jalur saat mulai baru
+                captainRouteLine.setLatLngs([]);
+
+                btnText.innerText = 'Berhenti Pantau';
                 btnToggle.className = "w-full sm:w-auto px-6 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
                 statusIndicator.className = "w-3 h-3 rounded-full bg-emerald-500 animate-pulse";
-                statusText.innerText = 'Status: Terhubung dengan Road Captain...';
+                statusText.innerText = 'Status: Merekam & Memantau Jalur...';
                 selectTouring.disabled = true;
 
-                // Lacak posisi member secara live
+                // Lacak posisi member (opsional untuk referensi peta)
                 memberWatchId = navigator.geolocation.watchPosition(
                     (position) => {
-                        memberCoords = [position.coords.latitude, position.coords.longitude];
+                        const memberCoords = [position.coords.latitude, position.coords.longitude];
 
                         if (!memberMarker) {
                             memberMarker = L.marker(memberCoords, {
@@ -279,16 +278,12 @@
                         } else {
                             memberMarker.setLatLng(memberCoords);
                         }
-
-                        updateConnectionLine();
                     },
-                    (error) => {
-                        showCustomNotification('GPS Error', 'Gagal melacak posisi Anda: ' + error.message, true);
-                    },
+                    (error) => { console.log("GPS member error: " + error.message); },
                     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
                 );
 
-                // Ambil data awal Road Captain & polling berkala
+                // Ambil data awal Road Captain & polling berkala untuk merekam jalurnya
                 fetchCaptainLocation(touringId);
                 watchInterval = setInterval(() => {
                     fetchCaptainLocation(touringId);
@@ -305,10 +300,10 @@
                 }
 
                 isWatching = false;
-                btnText.innerText = 'Mulai Hubungkan';
+                btnText.innerText = 'Mulai Pantau & Rekam Rute';
                 btnToggle.className = "w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
                 statusIndicator.className = "w-3 h-3 rounded-full bg-gray-500";
-                statusText.innerText = 'Status: Koneksi Diputus';
+                statusText.innerText = 'Status: Pemantauan Dihentikan';
                 selectTouring.disabled = false;
             }
         });
