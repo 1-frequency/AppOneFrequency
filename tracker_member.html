@@ -16,72 +16,85 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-card {
-            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.85), rgba(17, 24, 39, 0.95));
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
         #map {
-            height: 70vh;
+            height: 72vh;
             width: 100%;
             border-radius: 1.5rem;
             z-index: 1;
+            transition: height 0.3s ease;
+        }
+        .transition-max {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen pb-12 selection:bg-orange-500 selection:text-white">
+<body class="bg-gray-950 text-gray-100 min-h-screen pb-8 selection:bg-orange-500 selection:text-white">
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-6 py-4">
+    <header class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-6 py-3">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
+                <h1 class="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
                     MEMBER <span class="text-white">TRACKER</span>
                 </h1>
-                <p class="text-xs text-gray-400 font-medium">Pantau Jejak Rute Konvoi Road Captain</p>
+                <p class="text-[11px] text-gray-400 font-medium">Pantau Jejak Rute Konvoi Road Captain</p>
             </div>
-            <a href="index.html" class="text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-xl transition-all border border-gray-700">
-                &larr; Kembali ke Dashboard
+            <a href="index.html" class="text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded-xl transition-all border border-gray-700">
+                &larr; Kembali
             </a>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+    <main class="max-w-4xl mx-auto p-3 sm:p-5 space-y-4">
         
-        <!-- Panel Kontrol Member -->
-        <div class="glass-card rounded-3xl p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-                        Mode Jejak Rute Konvoi
+        <!-- Panel Kontrol Member (Collapsible / Dropdown) -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
+            <!-- Header Panel & Toggle Button -->
+            <div class="flex justify-between items-center cursor-pointer select-none" id="panel-toggle-header">
+                <div class="flex items-center space-x-3">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">
+                        Kontrol Peta
                     </span>
-                    <h2 class="text-xl font-black mt-2 text-white">Live Tracking & Rekam Jalur</h2>
-                    <p class="text-xs text-gray-400 mt-1">Pilih jadwal touring untuk mulai merekam dan memantau jalur rute Road Captain.</p>
+                    <h2 class="text-sm sm:text-base font-bold text-white">Live Tracking & Rekam Jalur</h2>
                 </div>
-
-                <div class="w-full sm:w-auto">
-                    <select id="select-touring" class="w-full sm:w-64 bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500 font-medium">
-                        <option value="">-- Memuat Jadwal Touring --</option>
-                    </select>
-                </div>
+                <button id="btn-collapse-icon" class="text-gray-400 hover:text-white p-1 rounded-lg bg-gray-800/50 border border-gray-700/50 transition-transform duration-300">
+                    <svg id="collapse-svg" class="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
             </div>
 
-            <!-- Status Indicator & Button -->
-            <div class="pt-3 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="flex items-center space-x-2">
-                    <span id="status-indicator" class="w-3 h-3 rounded-full bg-gray-500"></span>
-                    <span id="status-text" class="text-xs font-semibold text-gray-400">Status: Siap Memantau</span>
+            <!-- Isi Panel yang Bisa Disembunyikan/Dropdown -->
+            <div id="panel-body" class="space-y-3 pt-2 border-t border-gray-800/80 transition-max overflow-hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <p class="text-xs text-gray-400">Pilih jadwal touring untuk mulai merekam dan memantau jalur rute Road Captain.</p>
+                    <div class="w-full sm:w-auto">
+                        <select id="select-touring" class="w-full sm:w-60 bg-gray-900 border border-gray-700 text-gray-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 font-medium">
+                            <option value="">-- Memuat Jadwal Touring --</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button id="btn-toggle-watch" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    <span id="btn-text">Mulai Pantau & Rekam Rute</span>
-                </button>
+                <!-- Status Indicator & Button -->
+                <div class="pt-2 border-t border-gray-800/60 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="flex items-center space-x-2">
+                        <span id="status-indicator" class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
+                        <span id="status-text" class="text-xs font-semibold text-gray-400">Status: Siap Memantau</span>
+                    </div>
+
+                    <button id="btn-toggle-watch" class="w-full sm:w-auto px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <span id="btn-text">Mulai Pantau & Rekam Rute</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Peta Leaflet -->
-        <div class="glass-card p-3 rounded-3xl border border-gray-800 shadow-2xl">
+        <!-- Peta Leaflet (Lebih Luas) -->
+        <div class="glass-card p-2 rounded-3xl border border-gray-800 shadow-2xl">
             <div id="map"></div>
         </div>
 
@@ -115,11 +128,40 @@
         let memberMarker = null;
         let captainMarker = null;
         let captainRouteLine = null;
-        let captainPathCoords = []; // Array untuk merekam jejak jalur Road Captain
+        let captainPathCoords = [];
 
         let watchInterval = null;
         let memberWatchId = null;
         let isWatching = false;
+
+        // Toggle Collapse Panel Kontrol
+        const panelToggleHeader = document.getElementById('panel-toggle-header');
+        const panelBody = document.getElementById('panel-body');
+        const collapseSvg = document.getElementById('collapse-svg');
+        const mapElement = document.getElementById('map');
+        let isCollapsed = false;
+
+        panelToggleHeader.addEventListener('click', () => {
+            isCollapsed = !isCollapsed;
+            if (isCollapsed) {
+                panelBody.style.maxHeight = '0px';
+                panelBody.style.opacity = '0';
+                panelBody.style.paddingTop = '0px';
+                panelBody.style.marginTop = '0px';
+                collapseSvg.style.transform = 'rotate(0deg)';
+                mapElement.style.height = '84vh'; // Perbesar tinggi peta saat panel ditutup
+            } else {
+                panelBody.style.maxHeight = panelBody.scrollHeight + 'px';
+                panelBody.style.opacity = '1';
+                panelBody.style.paddingTop = '0.5rem';
+                collapseSvg.style.transform = 'rotate(180deg)';
+                mapElement.style.height = '72vh'; // Kembalikan ukuran peta normal
+            }
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        });
+
+        // Set initial max-height for animation
+        panelBody.style.maxHeight = panelBody.scrollHeight + 'px';
 
         // Custom Notification Handler
         function showCustomNotification(title, message, isError = false) {
@@ -154,9 +196,8 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Garis jalur perjalanan Road Captain (mengikuti jalan yang dilewati)
             captainRouteLine = L.polyline([], {
-                color: '#2563eb', // Warna Biru Terang
+                color: '#2563eb',
                 weight: 5,
                 opacity: 0.85
             }).addTo(map);
@@ -192,7 +233,7 @@
 
         fetchTouringSchedules();
 
-        // Ambil Posisi Road Captain dan Rekam Jejak Jalurnya
+        // Ambil Posisi Road Captain dan Rekam Jejak Jalurnya (Tabel live_tracking)
         async function fetchCaptainLocation(touringId) {
             try {
                 const { data, error } = await db
@@ -206,14 +247,12 @@
                 if (data && data.latitude && data.longitude) {
                     const captainCoords = [data.latitude, data.longitude];
 
-                    // Tambahkan titik koordinat baru ke riwayat jalur jika ada perpindahan posisi
                     const lastPoint = captainPathCoords[captainPathCoords.length - 1];
                     if (!lastPoint || lastPoint[0] !== captainCoords[0] || lastPoint[1] !== captainCoords[1]) {
                         captainPathCoords.push(captainCoords);
-                        captainRouteLine.setLatLngs(captainPathCoords); // Perbarui garis biru di peta
+                        captainRouteLine.setLatLngs(captainPathCoords);
                     }
 
-                    // Perbarui atau buat marker posisi Road Captain
                     if (!captainMarker) {
                         captainMarker = L.marker(captainCoords, {
                             icon: L.divIcon({
@@ -252,16 +291,15 @@
                 }
 
                 isWatching = true;
-                captainPathCoords = []; // Reset jejak jalur saat mulai baru
+                captainPathCoords = [];
                 captainRouteLine.setLatLngs([]);
 
                 btnText.innerText = 'Berhenti Pantau';
-                btnToggle.className = "w-full sm:w-auto px-6 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
-                statusIndicator.className = "w-3 h-3 rounded-full bg-emerald-500 animate-pulse";
+                btnToggle.className = "w-full sm:w-auto px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
+                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
                 statusText.innerText = 'Status: Merekam & Memantau Jalur...';
                 selectTouring.disabled = true;
 
-                // Lacak posisi member (opsional untuk referensi peta)
                 memberWatchId = navigator.geolocation.watchPosition(
                     (position) => {
                         const memberCoords = [position.coords.latitude, position.coords.longitude];
@@ -283,7 +321,6 @@
                     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
                 );
 
-                // Ambil data awal Road Captain & polling berkala untuk merekam jalurnya
                 fetchCaptainLocation(touringId);
                 watchInterval = setInterval(() => {
                     fetchCaptainLocation(touringId);
@@ -301,8 +338,8 @@
 
                 isWatching = false;
                 btnText.innerText = 'Mulai Pantau & Rekam Rute';
-                btnToggle.className = "w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
-                statusIndicator.className = "w-3 h-3 rounded-full bg-gray-500";
+                btnToggle.className = "w-full sm:w-auto px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg flex items-center justify-center space-x-2";
+                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-gray-500";
                 statusText.innerText = 'Status: Pemantauan Dihentikan';
                 selectTouring.disabled = false;
             }
