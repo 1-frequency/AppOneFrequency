@@ -241,7 +241,7 @@ setTimeout(() => {
     toast.classList.remove('opacity-100', 'translate-y-0');
     toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-5');
 }, 3000);
-
+}
         async function loadKeuangan() {
             const { data } = await db.from('transactions').select('*').order('created_at', { ascending: false }).limit(15);
             let total = 0;
