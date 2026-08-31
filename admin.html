@@ -449,16 +449,14 @@
         };
 
         window.deleteMember = async function(id) {
-            if(confirm('Apakah Anda yakin ingin menghapus member ini?')) {
-                const { error } = await db.from('members').delete().eq('id', id);
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else {
-                    showNotification('Member berhasil dihapus!', 'success');
-                    loadMembers();
-                }
-            }
-        };
+    const { error } = await db.from('members').delete().eq('id', id);
+    if(error) {
+        showNotification(error.message, 'error');
+    } else {
+        showNotification('Member berhasil dihapus!', 'success');
+        loadMembers();
+    }
+};
 
         window.editTouring = function(id, nama, tujuan, budget, peserta, hari, berangkat, pulang) {
             document.getElementById('modal-touring-title').innerText = 'Edit Rencana Touring';
@@ -474,16 +472,14 @@
         };
 
         window.deleteTouring = async function(id) {
-            if(confirm('Apakah Anda yakin ingin menghapus rencana touring ini?')) {
-                const { error } = await db.from('touring_plans').delete().eq('id', id);
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else {
-                    showNotification('Plan touring berhasil dihapus!', 'success');
-                    loadTouring();
-                }
-            }
-        };
+    const { error } = await db.from('touring_plans').delete().eq('id', id);
+    if(error) {
+        showNotification(error.message, 'error');
+    } else {
+        showNotification('Plan touring berhasil dihapus!', 'success');
+        loadTouring();
+    }
+};
 
         window.editTransaction = async function(id, type, amount, category, description) {
             await openModal(type);
@@ -521,16 +517,14 @@
         };
 
         window.deleteTransaction = async function(id) {
-            if(confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-                const { error } = await db.from('transactions').delete().eq('id', id);
-                if(error) {
-                    showNotification(error.message, 'error');
-                } else {
-                    showNotification('Transaksi berhasil dihapus!', 'success');
-                    loadKeuangan();
-                }
-            }
-        };
+    const { error } = await db.from('transactions').delete().eq('id', id);
+    if(error) {
+        showNotification(error.message, 'error');
+    } else {
+        showNotification('Transaksi berhasil dihapus!', 'success');
+        loadKeuangan();
+    }
+};
 
         // Inisialisasi Event Listener secara langsung
         loadKeuangan();
